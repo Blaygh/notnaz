@@ -116,16 +116,13 @@ audioGateBtn?.addEventListener("click", async () => {
   try {
     await bgMusic.play();
 
-    // ✅ Remove overlay completely so it can't keep blurring
+    // ✅ kill the gate completely
     if (audioGate) {
-      audioGate.classList.remove("show");   // in case you used classes
+      audioGate.hidden = true;             // triggers CSS rule above
+      audioGate.style.display = "none";    // immediate
       audioGate.style.backdropFilter = "none";
       audioGate.style.webkitBackdropFilter = "none";
-      audioGate.style.display = "none";
-      audioGate.hidden = true;
-
-      // strongest option: remove from DOM
-      audioGate.remove();
+      audioGate.remove();                  // remove from DOM (final guarantee)
     }
 
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
@@ -134,6 +131,7 @@ audioGateBtn?.addEventListener("click", async () => {
     alert("Tap again — some phones block audio the first time 💚");
   }
 });
+
 
 
 // Also attempt autoplay as soon as page loads
