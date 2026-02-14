@@ -1,4 +1,4 @@
-/* Production-ready vanilla JS for GitHub Pages */
+/* Mobile-first, production-ready vanilla JS for GitHub Pages */
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -35,11 +35,16 @@ const modalText = $("#modalText");
 const toggleMusicBtn = $("#toggleMusic");
 const bgMusic = $("#bgMusic");
 
+const audioGate = $("#audioGate");
+const audioGateBtn = $("#audioGateBtn");
+
 const canvas = $("#confetti");
 const ctx = canvas.getContext("2d", { alpha: true });
 
 let confettiPieces = [];
 let confettiAnimating = false;
+
+const $src = bgMusic?.querySelector("source")?.getAttribute("src");
 
 // ---------- helpers ----------
 function scrollToId(id) {
@@ -51,7 +56,7 @@ function scrollToId(id) {
 function openModal(text) {
   modalText.textContent = text;
   if (typeof modal.showModal === "function") modal.showModal();
-  else alert(text); // fallback
+  else alert(text);
 }
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -67,6 +72,64 @@ function setCanvasSize() {
 window.addEventListener("resize", setCanvasSize);
 setCanvasSize();
 
+// ---------- audio: autoplay on open (best effort) ----------
+async function tryAutoplay() {
+  if (!bgMusic || !$src) return; // no audio file set
+
+  bgMusic.loop = true;
+  bgMusic.volume = 0.85;
+
+  try {
+    await bgMusic.play(); // may fail due to autoplay restrictions
+    toggleMusicBtn?.setAttribute("aria-pressed", "true");
+    if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
+    if (audioGate) audioGate.hidden = true;
+  } catch (e) {
+    // Show a nice overlay requiring ONE tap
+    if (audioGate) audioGate.hidden = false;
+  }
+}
+
+// If autoplay is blocked, the gate button enables it.
+audioGateBtn?.addEventListener("click", async () => {
+  try {
+    await bgMusic.play();
+    if (audioGate) audioGate.hidden = true;
+    toggleMusicBtn?.setAttribute("aria-pressed", "true");
+    if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
+  } catch (e) {
+    openModal("Your browser is blocking audio. Try turning off Silent Mode or tap again 💚");
+  }
+});
+
+// Also attempt autoplay as soon as page loads
+window.addEventListener("load", () => {
+  tryAutoplay();
+});
+
+// Music toggle stays useful
+toggleMusicBtn?.addEventListener("click", async () => {
+  if (!bgMusic || !$src) {
+    openModal("Add ./assets/song.mp3 to enable music 🎶");
+    return;
+  }
+
+  try {
+    if (bgMusic.paused) {
+      await bgMusic.play();
+      toggleMusicBtn.setAttribute("aria-pressed", "true");
+      toggleMusicBtn.textContent = "♫ Music: On";
+    } else {
+      bgMusic.pause();
+      toggleMusicBtn.setAttribute("aria-pressed", "false");
+      toggleMusicBtn.textContent = "♫ Music";
+    }
+  } catch (e) {
+    // Show gate if needed
+    if (audioGate) audioGate.hidden = false;
+  }
+});
+
 // ---------- navigation buttons ----------
 document.addEventListener("click", (e) => {
   const next = e.target.closest("[data-next]");
@@ -75,11 +138,10 @@ document.addEventListener("click", (e) => {
   if (prev) scrollToId(prev.getAttribute("data-prev"));
 });
 
-skipToQuestion.addEventListener("click", () => scrollToId("#question"));
-beginBtn.addEventListener("click", () => scrollToId("#goodmorning"));
+skipToQuestion?.addEventListener("click", () => scrollToId("#question"));
+beginBtn?.addEventListener("click", () => scrollToId("#goodmorning"));
 
-restartBtn.addEventListener("click", () => {
-  // reset key UI state
+restartBtn?.addEventListener("click", () => {
   secretNote.hidden = true;
   gmNote.hidden = true;
   moodResult.textContent = "";
@@ -93,18 +155,17 @@ restartBtn.addEventListener("click", () => {
 });
 
 // ---------- secret note ----------
-secretBtn.addEventListener("click", () => {
+secretBtn?.addEventListener("click", () => {
   secretNote.hidden = !secretNote.hidden;
   if (!secretNote.hidden) popSparkles(14);
 });
 
 // ---------- Good morning ----------
-gmBtn.addEventListener("click", () => {
+gmBtn?.addEventListener("click", () => {
   gmNote.hidden = false;
   popSparkles(18);
 });
-
-gmReplay.addEventListener("click", () => popSparkles(22));
+gmReplay?.addEventListener("click", () => popSparkles(22));
 
 // ---------- mood chips ----------
 chips.forEach((btn) => {
@@ -122,7 +183,7 @@ chips.forEach((btn) => {
 });
 
 // ---------- gallery ----------
-gallery.addEventListener("click", (e) => {
+gallery?.addEventListener("click", (e) => {
   const tile = e.target.closest(".tile");
   if (!tile) return;
   const caption = tile.getAttribute("data-caption") || "💚";
@@ -131,7 +192,7 @@ gallery.addEventListener("click", (e) => {
 });
 
 // ---------- promise slider ----------
-promiseSlider.addEventListener("input", () => {
+promiseSlider?.addEventListener("input", () => {
   const v = Number(promiseSlider.value);
   sliderValue.textContent = `${v}%`;
 
@@ -154,18 +215,15 @@ promiseSlider.addEventListener("input", () => {
 });
 
 // ---------- final question buttons ----------
-yesBtn.addEventListener("click", () => {
+yesBtn?.addEventListener("click", () => {
   answer.hidden = false;
   popConfetti(220);
   openModal("You said YES 💚🌹 I love you!!!");
 });
 
 let dodgeLevel = 0;
-noBtn.addEventListener("mouseenter", () => dodgeNoButton());
-noBtn.addEventListener("click", () => {
-  // On mobile, clicking might happen more than hover—keep it playful
-  dodgeNoButton(true);
-});
+noBtn?.addEventListener("mouseenter", () => dodgeNoButton());
+noBtn?.addEventListener("click", () => dodgeNoButton(true));
 
 function dodgeNoButton(fromClick = false) {
   dodgeLevel = clamp(dodgeLevel + 1, 0, 8);
@@ -181,20 +239,16 @@ function dodgeNoButton(fromClick = false) {
     "Plot twist: it only accepts YES.",
     "Alright… I’ll stop (maybe)."
   ];
-
   openModal(lines[dodgeLevel - 1] || "Hmm…");
 
   const rect = noBtn.getBoundingClientRect();
   const padding = 14;
-
-  // Keep within viewport
   const maxX = window.innerWidth - rect.width - padding;
   const maxY = window.innerHeight - rect.height - padding;
 
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
 
-  // Move button using fixed positioning while dodging
   noBtn.style.position = "fixed";
   noBtn.style.left = `${x}px`;
   noBtn.style.top = `${y}px`;
@@ -215,36 +269,9 @@ copyBtn?.addEventListener("click", async () => {
   }
 });
 
-// ---------- music toggle (optional) ----------
-toggleMusicBtn.addEventListener("click", async () => {
-  // If you don't set an audio src, gracefully no-op
-  const hasSrc = bgMusic?.querySelector("source")?.getAttribute("src");
-  if (!hasSrc) {
-    openModal("Add an MP3 source in index.html to enable music 🎶");
-    return;
-  }
+// ---------- confetti ----------
+function popSparkles(count = 12) { popConfetti(count, true); }
 
-  try {
-    if (bgMusic.paused) {
-      await bgMusic.play();
-      toggleMusicBtn.setAttribute("aria-pressed", "true");
-      toggleMusicBtn.textContent = "♫ Music: On";
-    } else {
-      bgMusic.pause();
-      toggleMusicBtn.setAttribute("aria-pressed", "false");
-      toggleMusicBtn.textContent = "♫ Music";
-    }
-  } catch (e) {
-    openModal("Tap once anywhere on the page, then try Music again (browser autoplay rules).");
-  }
-});
-
-// ---------- sparkles (light confetti) ----------
-function popSparkles(count = 12) {
-  popConfetti(count, true);
-}
-
-// ---------- confetti engine ----------
 function popConfetti(count = 160, isSparkle = false) {
   const colors = isSparkle
     ? ["#2ee59d", "#ff4d7d", "#ffd479", "rgba(255,255,255,.9)"]
@@ -275,7 +302,6 @@ function popConfetti(count = 160, isSparkle = false) {
 
 function tickConfetti() {
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
-
   confettiPieces = confettiPieces.filter(p => p.life > 0);
 
   for (const p of confettiPieces) {
@@ -284,7 +310,6 @@ function tickConfetti() {
     p.rot += p.vr;
     p.life -= 1;
 
-    // drift + wrap
     if (p.x < -50) p.x = window.innerWidth + 50;
     if (p.x > window.innerWidth + 50) p.x = -50;
 
@@ -300,15 +325,12 @@ function tickConfetti() {
     } else {
       ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
     }
-
     ctx.restore();
   }
 
-  if (confettiPieces.length > 0) {
-    requestAnimationFrame(tickConfetti);
-  } else {
+  if (confettiPieces.length > 0) requestAnimationFrame(tickConfetti);
+  else {
     confettiAnimating = false;
     ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   }
 }
-app
