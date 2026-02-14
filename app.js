@@ -31,6 +31,7 @@ const copyStatus = $("#copyStatus");
 
 const modal = $("#modal");
 const modalText = $("#modalText");
+const modalCloseBtn = $("#modalCloseBtn");
 
 const toggleMusicBtn = $("#toggleMusic");
 const bgMusic = $("#bgMusic");
@@ -58,6 +59,20 @@ function openModal(text) {
   if (typeof modal.showModal === "function") modal.showModal();
   else alert(text);
 }
+// close when clicking the button
+modalCloseBtn?.addEventListener("click", () => {
+  if (modal?.open) modal.close();
+});
+
+// close when clicking outside the modal content
+modal?.addEventListener("click", (e) => {
+  if (e.target === modal) modal.close();
+});
+
+// close with ESC (some browsers do this automatically, but we enforce it)
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && modal?.open) modal.close();
+});
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
@@ -237,13 +252,12 @@ function dodgeNoButton(fromClick = false) {
   const lines = [
     "Wait… are you sure? 😳",
     "Try again 😂",
-    "Nope, that button is shy.",
-    "You’re too cute for ‘No’.",
-    "Okay but… look at the green theme though 💚",
-    "Last chance… 😌",
     "I’m gonna pretend I didn’t see that.",
-    "Plot twist: it only accepts YES.",
-    "Alright… I’ll stop (maybe)."
+    "I hope you know you can't say no to me",
+    "There you go again trying to be stubborn",
+    "You dont learn huh.",
+    "You know how this will end",
+    
   ];
   openModal(lines[dodgeLevel - 1] || "Hmm…");
 
