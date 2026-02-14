@@ -424,6 +424,9 @@ body::before{
 }
 .audio-sub{ margin: 0 0 14px; color: var(--muted); }
 
+.modal-actions { display:flex; justify-content:flex-end; }
+.modal-inner { pointer-events: auto; }
+
 /* tablet+ */
 @media (min-width: 820px){
   :root{ --pad: 16px; --gap: 16px; }
