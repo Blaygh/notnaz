@@ -94,11 +94,17 @@ async function tryAutoplay() {
 audioGateBtn?.addEventListener("click", async () => {
   try {
     await bgMusic.play();
-    if (audioGate) audioGate.hidden = true;
+
+    if (audioGate) {
+      audioGate.style.display = "none";   // force hide
+      audioGate.hidden = true;            // also set hidden attr
+    }
+
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
+
   } catch (e) {
-    openModal("Your browser is blocking audio. Try turning off Silent Mode or tap again 💚");
+    alert("Tap again — some phones block audio the first time 💚");
   }
 });
 
