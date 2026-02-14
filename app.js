@@ -1,4 +1,4 @@
-/* app.js — Production-ready vanilla JS for GitHub Pages */
+/* app.js — Production-ready vanilla JS */
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -30,8 +30,6 @@ const confettiBtn = $("#confettiBtn");
 const copyBtn = $("#copyBtn");
 const copyStatus = $("#copyStatus");
 
-const toast = $("#toast");
-
 const canvas = $("#confetti");
 const ctx = canvas?.getContext("2d", { alpha: true });
 
@@ -44,15 +42,6 @@ function scrollToId(id) {
   if (!el) return;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
-
-function showToast(msg) {
-  if (!toast) return;
-  toast.textContent = msg;
-  toast.hidden = false;
-  clearTimeout(showToast._t);
-  showToast._t = setTimeout(() => { toast.hidden = true; }, 2200);
-}
-
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
 // ---------- canvas sizing ----------
@@ -69,11 +58,10 @@ window.addEventListener("resize", setCanvasSize);
 setCanvasSize();
 
 // ---------- audio ----------
-function killGate() {
+function hideAudioGate() {
   if (!audioGate) return;
   audioGate.hidden = true;
   audioGate.style.display = "none";
-
   // iOS repaint nudge
   document.body.style.webkitTransform = "translateZ(0)";
   requestAnimationFrame(() => (document.body.style.webkitTransform = ""));
@@ -81,7 +69,6 @@ function killGate() {
 
 async function tryAutoplay() {
   if (!bgMusic) return;
-
   const src = bgMusic.querySelector("source")?.getAttribute("src");
   if (!src) return;
 
@@ -92,7 +79,7 @@ async function tryAutoplay() {
     await bgMusic.play();
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-    killGate();
+    hideAudioGate();
   } catch {
     if (audioGate) audioGate.hidden = false;
   }
@@ -103,26 +90,23 @@ audioGateBtn?.addEventListener("click", async () => {
     await bgMusic.play();
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-    killGate();
+    hideAudioGate();
   } catch {
-    showToast("Tap again 💚 (some phones block the first try)");
+    alert("Tap again 💚 (some phones block the first try)");
   }
 });
 
 toggleMusicBtn?.addEventListener("click", async () => {
   if (!bgMusic) return;
-
   try {
     if (bgMusic.paused) {
       await bgMusic.play();
       toggleMusicBtn.setAttribute("aria-pressed", "true");
       toggleMusicBtn.textContent = "♫ Music: On";
-      showToast("Music on 🎶");
     } else {
       bgMusic.pause();
       toggleMusicBtn.setAttribute("aria-pressed", "false");
       toggleMusicBtn.textContent = "♫ Music";
-      showToast("Music off");
     }
   } catch {
     if (audioGate) audioGate.hidden = false;
@@ -158,38 +142,38 @@ restartBtn?.addEventListener("click", () => {
 secretBtn?.addEventListener("click", () => {
   if (!secretNote) return;
   secretNote.hidden = !secretNote.hidden;
-  if (!secretNote.hidden) popSparkles(14);
 });
 
-// ---------- fullscreen viewer (scroll-safe, close-safe) ----------
-function lockScroll() {
-  const y = window.scrollY || document.documentElement.scrollTop || 0;
-  document.body.dataset.scrollY = String(y);
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${y}px`;
-  document.body.style.left = "0";
-  document.body.style.right = "0";
-  document.body.style.width = "100%";
-}
+// ---------- viewer (scrollable) ----------
+function ensureViewerLayout() {
+  // Wrap image+caption into a scroll-friendly container once.
+  if (!viewer) return;
+  if (viewer.querySelector(".viewer-content")) return;
 
-function unlockScroll() {
-  const y = parseInt(document.body.dataset.scrollY || "0", 10);
-  document.body.style.position = "";
-  document.body.style.top = "";
-  document.body.style.left = "";
-  document.body.style.right = "";
-  document.body.style.width = "";
-  delete document.body.dataset.scrollY;
-  window.scrollTo(0, y);
+  const content = document.createElement("div");
+  content.className = "viewer-content";
+
+  // move existing img + caption into wrapper
+  if (viewerImg) content.appendChild(viewerImg);
+  if (viewerCaption) content.appendChild(viewerCaption);
+
+  // viewer currently contains: close button + img + caption
+  // We want: close button + content wrapper
+  viewer.appendChild(content);
 }
 
 function openViewer(src, caption) {
+  ensureViewerLayout();
   if (!viewer || !viewerImg || !viewerCaption) return;
+
   viewerImg.src = src;
   viewerCaption.textContent = caption || "";
+
   viewer.hidden = false;
   viewer.setAttribute("aria-hidden", "false");
-  lockScroll();
+
+  // ✅ allow scrolling in viewer, but prevent background taps
+  viewer.scrollTop = 0;
 }
 
 function closeViewer() {
@@ -197,7 +181,6 @@ function closeViewer() {
   viewer.hidden = true;
   viewer.setAttribute("aria-hidden", "true");
   viewerImg.src = "";
-  unlockScroll();
 }
 
 moments?.addEventListener("click", (e) => {
@@ -215,11 +198,6 @@ viewerClose?.addEventListener("click", (e) => {
   closeViewer();
 });
 
-// tap the backdrop to close
-viewer?.addEventListener("click", (e) => {
-  if (e.target === viewer) closeViewer();
-});
-
 // ESC to close
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
@@ -229,7 +207,6 @@ window.addEventListener("keydown", (e) => {
 yesBtn?.addEventListener("click", () => {
   if (answer) answer.hidden = false;
   popConfetti(220);
-  showToast("💚💚💚");
 });
 
 let dodge = 0;
@@ -238,16 +215,6 @@ noBtn?.addEventListener("click", () => dodgeNo(true));
 
 function dodgeNo(fromClick=false) {
   dodge = clamp(dodge + 1, 0, 6);
-
-  const lines = [
-    "Wait… are you sure? 😳",
-    "Try again 😂",
-    "Nope 😌",
-    "You can’t say no to me 💚",
-    "Okay okay… still no 🙃",
-    "You know how this ends 😭"
-  ];
-  showToast(lines[dodge - 1] || "Hmm…");
 
   const rect = noBtn.getBoundingClientRect();
   const pad = 14;
@@ -262,7 +229,7 @@ function dodgeNo(fromClick=false) {
   noBtn.style.top = `${y}px`;
   noBtn.style.zIndex = "60";
 
-  popSparkles(fromClick ? 10 : 6);
+  if (fromClick) popConfetti(40, true);
 }
 
 // ---------- copy ----------
@@ -271,16 +238,13 @@ copyBtn?.addEventListener("click", async () => {
   try {
     await navigator.clipboard.writeText(msg);
     if (copyStatus) copyStatus.textContent = "Copied 💚";
-    showToast("Copied 💚");
   } catch {
     if (copyStatus) copyStatus.textContent = "Couldn’t copy — screenshot works too 💚";
-    showToast("Screenshot works too 💚");
   }
 });
 
 // ---------- confetti ----------
 confettiBtn?.addEventListener("click", () => popConfetti(180));
-function popSparkles(count=12){ popConfetti(count, true); }
 
 function popConfetti(count = 160, sparkle = false) {
   if (!ctx) return;
@@ -313,8 +277,6 @@ function popConfetti(count = 160, sparkle = false) {
 }
 
 function tickConfetti() {
-  if (!ctx) return;
-
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   confettiPieces = confettiPieces.filter(p => p.life > 0);
 
