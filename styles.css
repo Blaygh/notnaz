@@ -283,10 +283,11 @@ body::before{
 .viewer{
   position: fixed;
   inset: 0;
-  z-index: 9998;
+  z-index: 99999; /* was 9998 — make it unquestionably higher */
   background: rgba(0,0,0,.86);
-  overflow-y: auto;                  /* ✅ scroll in viewer mode */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  isolation: isolate; /* prevents weird stacking with other sticky elements */
 }
 
 /* Drag indicator */
@@ -301,7 +302,7 @@ body::before{
 /* Always-visible, obvious close button */
 .viewer-close{
   position: sticky;
-  top: 10px;
+  top: env(safe-area-inset-top, 0px); /* supports iPhone notch */
   margin: 10px 12px 0 auto;
   display: inline-flex;
   align-items:center;
