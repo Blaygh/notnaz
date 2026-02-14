@@ -1,11 +1,20 @@
-/* Mobile-first, production-ready vanilla JS for GitHub Pages */
+/* Production-ready vanilla JS for GitHub Pages */
 
 const $ = (sel) => document.querySelector(sel);
+
+const audioGate = $("#audioGate");
+const audioGateBtn = $("#audioGateBtn");
+const bgMusic = $("#bgMusic");
+const toggleMusicBtn = $("#toggleMusic");
 
 const beginBtn = $("#beginBtn");
 const secretBtn = $("#secretBtn");
 const secretNote = $("#secretNote");
-const skipToQuestion = $("#skipToQuestion");
+const jumpBtn = $("#jumpBtn");
+
+const backToTopBtn = $("#backToTopBtn");
+const toQuestionBtn = $("#toQuestionBtn");
+const backToMomentsBtn = $("#backToMomentsBtn");
 const restartBtn = $("#restartBtn");
 
 const moments = $("#moments");
@@ -21,14 +30,7 @@ const confettiBtn = $("#confettiBtn");
 const copyBtn = $("#copyBtn");
 const copyStatus = $("#copyStatus");
 
-const modal = $("#modal");
-const modalText = $("#modalText");
-const modalCloseBtn = $("#modalCloseBtn");
-
-const toggleMusicBtn = $("#toggleMusic");
-const bgMusic = $("#bgMusic");
-const audioGate = $("#audioGate");
-const audioGateBtn = $("#audioGateBtn");
+const toast = $("#toast");
 
 const canvas = $("#confetti");
 const ctx = canvas?.getContext("2d", { alpha: true });
@@ -36,36 +38,23 @@ const ctx = canvas?.getContext("2d", { alpha: true });
 let confettiPieces = [];
 let confettiAnimating = false;
 
-const $src = bgMusic?.querySelector("source")?.getAttribute("src");
-
-// ---------- helpers ----------
 function scrollToId(id) {
   const el = document.querySelector(id);
   if (!el) return;
   el.scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
-function openModal(text) {
-  if (!modal || !modalText) return alert(text);
-  modalText.textContent = text;
-  if (typeof modal.showModal === "function") modal.showModal();
-  else alert(text);
+function showToast(msg) {
+  if (!toast) return;
+  toast.textContent = msg;
+  toast.hidden = false;
+  clearTimeout(showToast._t);
+  showToast._t = setTimeout(() => { toast.hidden = true; }, 2200);
 }
-
-// close modal
-modalCloseBtn?.addEventListener("click", () => {
-  if (modal?.open) modal.close();
-});
-modal?.addEventListener("click", (e) => {
-  if (e.target === modal) modal.close();
-});
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && modal?.open) modal.close();
-});
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
-// ---------- confetti canvas sizing ----------
+// ---------- Canvas ----------
 function setCanvasSize() {
   if (!canvas || !ctx) return;
   const dpr = window.devicePixelRatio || 1;
@@ -78,38 +67,31 @@ function setCanvasSize() {
 window.addEventListener("resize", setCanvasSize);
 setCanvasSize();
 
-// ---------- audio ----------
-function safariRepaintFix() {
-  // clears lingering backdrop-filter compositor layers on iOS
-  document.body.style.transform = "translateZ(0)";
-  requestAnimationFrame(() => {
-    document.body.style.transform = "";
-  });
-}
-
-function killAudioGate() {
+// ---------- Audio ----------
+function killGate() {
   if (!audioGate) return;
   audioGate.hidden = true;
   audioGate.style.display = "none";
-  audioGate.style.backdropFilter = "none";
-  audioGate.style.webkitBackdropFilter = "none";
-  audioGate.remove();
-  safariRepaintFix();
+  // repaint nudge for iOS compositing
+  document.body.style.webkitTransform = "translateZ(0)";
+  requestAnimationFrame(() => (document.body.style.webkitTransform = ""));
 }
 
 async function tryAutoplay() {
-  if (!bgMusic || !$src) return;
+  if (!bgMusic) return;
+
+  const src = bgMusic.querySelector("source")?.getAttribute("src");
+  if (!src) return;
 
   bgMusic.loop = true;
-  bgMusic.volume = 0.85;
+  bgMusic.volume = 0.9;
 
   try {
     await bgMusic.play();
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-    killAudioGate();
+    killGate();
   } catch {
-    // autoplay blocked
     if (audioGate) audioGate.hidden = false;
   }
 }
@@ -119,9 +101,29 @@ audioGateBtn?.addEventListener("click", async () => {
     await bgMusic.play();
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-    killAudioGate();
+    killGate();
   } catch {
-    alert("Tap again — some phones block audio the first time 💚");
+    showToast("Tap again 💚 (some phones block the first try)");
+  }
+});
+
+toggleMusicBtn?.addEventListener("click", async () => {
+  if (!bgMusic) return;
+
+  try {
+    if (bgMusic.paused) {
+      await bgMusic.play();
+      toggleMusicBtn.setAttribute("aria-pressed", "true");
+      toggleMusicBtn.textContent = "♫ Music: On";
+      showToast("Music on 🎶");
+    } else {
+      bgMusic.pause();
+      toggleMusicBtn.setAttribute("aria-pressed", "false");
+      toggleMusicBtn.textContent = "♫ Music";
+      showToast("Music off");
+    }
+  } catch {
+    if (audioGate) audioGate.hidden = false;
   }
 });
 
@@ -129,38 +131,12 @@ window.addEventListener("load", () => {
   tryAutoplay();
 });
 
-// music toggle
-toggleMusicBtn?.addEventListener("click", async () => {
-  if (!bgMusic || !$src) {
-    openModal("Add assets/song.mp3 to enable music 🎶");
-    return;
-  }
-
-  try {
-    if (bgMusic.paused) {
-      await bgMusic.play();
-      toggleMusicBtn.setAttribute("aria-pressed", "true");
-      toggleMusicBtn.textContent = "♫ Music: On";
-    } else {
-      bgMusic.pause();
-      toggleMusicBtn.setAttribute("aria-pressed", "false");
-      toggleMusicBtn.textContent = "♫ Music";
-    }
-  } catch {
-    if (audioGate) audioGate.hidden = false;
-  }
-});
-
-// ---------- navigation ----------
-document.addEventListener("click", (e) => {
-  const next = e.target.closest("[data-next]");
-  const prev = e.target.closest("[data-prev]");
-  if (next) scrollToId(next.getAttribute("data-next"));
-  if (prev) scrollToId(prev.getAttribute("data-prev"));
-});
-
-skipToQuestion?.addEventListener("click", () => scrollToId("#question"));
+// ---------- Navigation ----------
 beginBtn?.addEventListener("click", () => scrollToId("#memories"));
+jumpBtn?.addEventListener("click", () => scrollToId("#question"));
+backToTopBtn?.addEventListener("click", () => scrollToId("#start"));
+toQuestionBtn?.addEventListener("click", () => scrollToId("#question"));
+backToMomentsBtn?.addEventListener("click", () => scrollToId("#memories"));
 
 restartBtn?.addEventListener("click", () => {
   secretNote && (secretNote.hidden = true);
@@ -169,14 +145,14 @@ restartBtn?.addEventListener("click", () => {
   scrollToId("#start");
 });
 
-// ---------- secret ----------
+// ---------- Secret ----------
 secretBtn?.addEventListener("click", () => {
   if (!secretNote) return;
   secretNote.hidden = !secretNote.hidden;
   if (!secretNote.hidden) popSparkles(14);
 });
 
-// ---------- fullscreen viewer for moments ----------
+// ---------- Fullscreen Viewer ----------
 function openViewer(src, caption) {
   if (!viewer || !viewerImg || !viewerCaption) return;
   viewerImg.src = src;
@@ -197,49 +173,45 @@ function closeViewer() {
 moments?.addEventListener("click", (e) => {
   const btn = e.target.closest(".moment");
   if (!btn) return;
-  const img = btn.querySelector("img");
+  const src = btn.getAttribute("data-src") || btn.querySelector("img")?.src;
   const caption = btn.getAttribute("data-caption") || "";
-  if (img?.src) openViewer(img.src, caption);
+  if (src) openViewer(src, caption);
 });
 
 viewerClose?.addEventListener("click", closeViewer);
-viewer?.addEventListener("click", (e) => {
-  if (e.target === viewer) closeViewer();
-});
+viewer?.addEventListener("click", (e) => { if (e.target === viewer) closeViewer(); });
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
 });
 
-// ---------- final question ----------
+// ---------- Valentine buttons ----------
 yesBtn?.addEventListener("click", () => {
   if (answer) answer.hidden = false;
   popConfetti(220);
-  openModal("YAY 💚🌹");
+  showToast("💚💚💚");
 });
 
-let dodgeLevel = 0;
-noBtn?.addEventListener("mouseenter", () => dodgeNoButton());
-noBtn?.addEventListener("click", () => dodgeNoButton(true));
+let dodge = 0;
+noBtn?.addEventListener("mouseenter", () => dodgeNo());
+noBtn?.addEventListener("click", () => dodgeNo(true));
 
-function dodgeNoButton(fromClick = false) {
-  dodgeLevel = clamp(dodgeLevel + 1, 0, 7);
+function dodgeNo(fromClick=false) {
+  dodge = clamp(dodge + 1, 0, 6);
 
   const lines = [
     "Wait… are you sure? 😳",
     "Try again 😂",
-    "I’m gonna pretend I didn’t see that.",
-    "You can’t say no to me 😌",
-    "There you go again being stubborn",
-    "You don’t learn huh 😭",
-    "You know how this ends 💚",
+    "Nope 😌",
+    "You can’t say no to me 💚",
+    "Okay, okay… still no 🙃",
+    "You know how this ends 😭"
   ];
-
-  openModal(lines[dodgeLevel - 1] || "Hmm…");
+  showToast(lines[dodge - 1] || "Hmm…");
 
   const rect = noBtn.getBoundingClientRect();
-  const padding = 14;
-  const maxX = window.innerWidth - rect.width - padding;
-  const maxY = window.innerHeight - rect.height - padding;
+  const pad = 14;
+  const maxX = window.innerWidth - rect.width - pad;
+  const maxY = window.innerHeight - rect.height - pad;
 
   const x = Math.random() * maxX;
   const y = Math.random() * maxY;
@@ -252,25 +224,27 @@ function dodgeNoButton(fromClick = false) {
   popSparkles(fromClick ? 10 : 6);
 }
 
-confettiBtn?.addEventListener("click", () => popConfetti(180));
-
+// ---------- Copy ----------
 copyBtn?.addEventListener("click", async () => {
-  const msg = "She said YES 💚🌹 Will you be my Valentine?";
+  const msg = "Will you be my Valentine? 💚🌹";
   try {
     await navigator.clipboard.writeText(msg);
     if (copyStatus) copyStatus.textContent = "Copied 💚";
+    showToast("Copied 💚");
   } catch {
     if (copyStatus) copyStatus.textContent = "Couldn’t copy — screenshot works too 💚";
+    showToast("Screenshot works too 💚");
   }
 });
 
-// ---------- confetti ----------
-function popSparkles(count = 12) { popConfetti(count, true); }
+// ---------- Confetti ----------
+confettiBtn?.addEventListener("click", () => popConfetti(180));
+function popSparkles(count=12){ popConfetti(count, true); }
 
-function popConfetti(count = 160, isSparkle = false) {
+function popConfetti(count = 160, sparkle = false) {
   if (!ctx) return;
 
-  const colors = isSparkle
+  const colors = sparkle
     ? ["#2ee59d", "#ff4d7d", "#ffd479", "rgba(255,255,255,.9)"]
     : ["#2ee59d", "#ff4d7d", "#ffd479", "rgba(255,255,255,.85)"];
 
@@ -278,9 +252,9 @@ function popConfetti(count = 160, isSparkle = false) {
     confettiPieces.push({
       x: Math.random() * window.innerWidth,
       y: -20 - Math.random() * 120,
-      r: isSparkle ? (2 + Math.random() * 3) : (3 + Math.random() * 5),
-      w: isSparkle ? (2 + Math.random() * 4) : (6 + Math.random() * 10),
-      h: isSparkle ? (2 + Math.random() * 4) : (8 + Math.random() * 14),
+      r: sparkle ? (2 + Math.random() * 3) : (3 + Math.random() * 5),
+      w: sparkle ? (2 + Math.random() * 4) : (6 + Math.random() * 10),
+      h: sparkle ? (2 + Math.random() * 4) : (8 + Math.random() * 14),
       vx: (Math.random() - 0.5) * 2.2,
       vy: 2.0 + Math.random() * 3.6,
       rot: Math.random() * Math.PI,
