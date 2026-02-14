@@ -14,6 +14,13 @@
 </head>
 
 <body>
+<div id="audioGate" class="audio-gate" hidden>
+  <div class="audio-gate-card">
+    <p class="audio-title">One tiny tap 💚</p>
+    <p class="audio-sub">Tap to start the song (your phone blocks autoplay sometimes).</p>
+    <button id="audioGateBtn" class="btn primary big" type="button">Start music 🎶</button>
+  </div>
+</div>
   <div class="bg" aria-hidden="true">
     <div class="glow g1"></div>
     <div class="glow g2"></div>
@@ -253,9 +260,8 @@
     </section>
 
     <!-- AUDIO (optional) -->
-    <audio id="bgMusic" preload="none" loop>
-      <!-- Replace with your own mp3 hosted somewhere, or remove entirely -->
-      <source src="" type="audio/mpeg" />
+    <audio id="bgMusic" preload="auto" loop playsinline>
+      <source src="./assets/song.mp3" type="audio/mpeg" />
     </audio>
 
     <!-- CONFETTI CANVAS -->
