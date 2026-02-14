@@ -100,15 +100,15 @@ async function tryAutoplay() {
   bgMusic.loop = true;
   bgMusic.volume = 0.85;
 
-  try {
-    await bgMusic.play(); // may fail due to autoplay restrictions
-    toggleMusicBtn?.setAttribute("aria-pressed", "true");
-    if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-    if (audioGate) audioGate.hidden = true;
-  } catch (e) {
-    // Show a nice overlay requiring ONE tap
-    if (audioGate) audioGate.hidden = false;
-  }
+try {
+  await bgMusic.play();
+  toggleMusicBtn?.setAttribute("aria-pressed", "true");
+  if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
+
+  if (audioGate) audioGate.remove(); // ✅ remove on success autoplay
+} catch (e) {
+  if (audioGate) audioGate.hidden = false;
+}
 }
 
 // If autoplay is blocked, the gate button enables it.
@@ -116,18 +116,25 @@ audioGateBtn?.addEventListener("click", async () => {
   try {
     await bgMusic.play();
 
+    // ✅ Remove overlay completely so it can't keep blurring
     if (audioGate) {
-      audioGate.style.display = "none";   // force hide
-      audioGate.hidden = true;            // also set hidden attr
+      audioGate.classList.remove("show");   // in case you used classes
+      audioGate.style.backdropFilter = "none";
+      audioGate.style.webkitBackdropFilter = "none";
+      audioGate.style.display = "none";
+      audioGate.hidden = true;
+
+      // strongest option: remove from DOM
+      audioGate.remove();
     }
 
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-
   } catch (e) {
     alert("Tap again — some phones block audio the first time 💚");
   }
 });
+
 
 // Also attempt autoplay as soon as page loads
 window.addEventListener("load", () => {
