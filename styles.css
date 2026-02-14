@@ -68,6 +68,13 @@ body::before{
   -webkit-backdrop-filter: blur(10px);
 }
 
+[hidden]{
+  display: none !important;
+}
+
+.audio-gate[hidden]{ display:none !important; }
+
+
 .brand{
   display:flex;
   align-items:center;
