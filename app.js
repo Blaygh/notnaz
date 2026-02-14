@@ -1,4 +1,6 @@
-/* app.js — Production-ready vanilla JS */
+/* app.js — Production-ready vanilla JS
+   + scrollable viewer + drag-down-to-close gesture (mobile friendly)
+*/
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -128,7 +130,6 @@ restartBtn?.addEventListener("click", () => {
   secretNote && (secretNote.hidden = true);
   answer && (answer.hidden = true);
   copyStatus && (copyStatus.textContent = "");
-  // reset NO button position if it moved
   if (noBtn) {
     noBtn.style.position = "";
     noBtn.style.left = "";
@@ -144,22 +145,32 @@ secretBtn?.addEventListener("click", () => {
   secretNote.hidden = !secretNote.hidden;
 });
 
-// ---------- viewer (scrollable) ----------
+// ---------- viewer layout (scrollable) ----------
+let viewerContent = null;
+
 function ensureViewerLayout() {
-  // Wrap image+caption into a scroll-friendly container once.
   if (!viewer) return;
-  if (viewer.querySelector(".viewer-content")) return;
 
-  const content = document.createElement("div");
-  content.className = "viewer-content";
+  // add drag hint (top)
+  if (!viewer.querySelector(".drag-hint")) {
+    const hint = document.createElement("div");
+    hint.className = "drag-hint";
+    viewer.insertBefore(hint, viewer.firstChild);
+  }
 
-  // move existing img + caption into wrapper
-  if (viewerImg) content.appendChild(viewerImg);
-  if (viewerCaption) content.appendChild(viewerCaption);
+  // wrap image + caption into viewer-content once
+  if (viewer.querySelector(".viewer-content")) {
+    viewerContent = viewer.querySelector(".viewer-content");
+    return;
+  }
 
-  // viewer currently contains: close button + img + caption
-  // We want: close button + content wrapper
-  viewer.appendChild(content);
+  viewerContent = document.createElement("div");
+  viewerContent.className = "viewer-content";
+
+  if (viewerImg) viewerContent.appendChild(viewerImg);
+  if (viewerCaption) viewerContent.appendChild(viewerCaption);
+
+  viewer.appendChild(viewerContent);
 }
 
 function openViewer(src, caption) {
@@ -172,7 +183,8 @@ function openViewer(src, caption) {
   viewer.hidden = false;
   viewer.setAttribute("aria-hidden", "false");
 
-  // ✅ allow scrolling in viewer, but prevent background taps
+  // reset pull animation + scroll to top
+  viewer.style.setProperty("--pull", "0px");
   viewer.scrollTop = 0;
 }
 
@@ -181,8 +193,10 @@ function closeViewer() {
   viewer.hidden = true;
   viewer.setAttribute("aria-hidden", "true");
   viewerImg.src = "";
+  viewer.style.setProperty("--pull", "0px");
 }
 
+// open from moments
 moments?.addEventListener("click", (e) => {
   const btn = e.target.closest(".moment");
   if (!btn) return;
@@ -192,6 +206,7 @@ moments?.addEventListener("click", (e) => {
   if (src) openViewer(src, caption);
 });
 
+// close button
 viewerClose?.addEventListener("click", (e) => {
   e.preventDefault();
   e.stopPropagation();
@@ -201,6 +216,69 @@ viewerClose?.addEventListener("click", (e) => {
 // ESC to close
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
+});
+
+// ---------- drag-down-to-close (while still scrollable) ----------
+let dragActive = false;
+let startY = 0;
+let pull = 0;
+
+function canStartDrag() {
+  // only allow drag-to-close if viewer is scrolled to top
+  return viewer && viewer.scrollTop <= 0;
+}
+
+viewer?.addEventListener("pointerdown", (e) => {
+  if (!viewer || viewer.hidden) return;
+  if (!canStartDrag()) return;
+
+  // if they start dragging on caption text selection, ignore
+  const inCaption = e.target.closest(".viewer-caption");
+  if (inCaption) return;
+
+  dragActive = true;
+  startY = e.clientY;
+  pull = 0;
+  viewer.setPointerCapture?.(e.pointerId);
+});
+
+viewer?.addEventListener("pointermove", (e) => {
+  if (!dragActive || !viewer) return;
+
+  const dy = e.clientY - startY;
+  if (dy <= 0) {
+    pull = 0;
+    viewer.style.setProperty("--pull", "0px");
+    return;
+  }
+
+  // apply resistance
+  pull = Math.min(dy, 220);
+  const eased = pull * 0.65;
+
+  viewer.style.setProperty("--pull", `${eased}px`);
+
+  // prevent page “rubber band” while dragging
+  e.preventDefault?.();
+}, { passive: false });
+
+viewer?.addEventListener("pointerup", () => {
+  if (!dragActive || !viewer) return;
+  dragActive = false;
+
+  // threshold to close
+  if (pull > 140) {
+    closeViewer();
+  } else {
+    // snap back
+    viewer.style.setProperty("--pull", "0px");
+  }
+});
+
+viewer?.addEventListener("pointercancel", () => {
+  if (!viewer) return;
+  dragActive = false;
+  viewer.style.setProperty("--pull", "0px");
 });
 
 // ---------- valentine buttons ----------
