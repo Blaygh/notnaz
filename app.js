@@ -8,6 +8,12 @@ const secretNote = $("#secretNote");
 const skipToQuestion = $("#skipToQuestion");
 const restartBtn = $("#restartBtn");
 
+const moments = $("#moments");
+const viewer = $("#viewer");
+const viewerImg = $("#viewerImg");
+const viewerCaption = $("#viewerCaption");
+const viewerClose = $("#viewerClose");
+
 const gmBtn = $("#gmBtn");
 const gmNote = $("#gmNote");
 const gmReplay = $("#gmReplay");
@@ -160,7 +166,7 @@ document.addEventListener("click", (e) => {
 });
 
 skipToQuestion?.addEventListener("click", () => scrollToId("#question"));
-beginBtn?.addEventListener("click", () => scrollToId("#goodmorning"));
+beginBtn?.addEventListener("click", () => scrollToId("#memories"));
 
 restartBtn?.addEventListener("click", () => {
   secretNote.hidden = true;
@@ -288,6 +294,42 @@ copyBtn?.addEventListener("click", async () => {
     copyStatus.textContent = "Couldn’t copy automatically—no worries, just screenshot 💚";
   }
 });
+
+function openViewer(src, caption) {
+  viewerImg.src = src;
+  viewerCaption.textContent = caption || "";
+  viewer.hidden = false;
+  viewer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
+
+function closeViewer() {
+  viewer.hidden = true;
+  viewer.setAttribute("aria-hidden", "true");
+  viewerImg.src = "";
+  document.body.style.overflow = "";
+}
+
+moments?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".moment");
+  if (!btn) return;
+  const img = btn.querySelector("img");
+  const caption = btn.getAttribute("data-caption") || "";
+  if (img?.src) openViewer(img.src, caption);
+});
+
+viewerClose?.addEventListener("click", closeViewer);
+
+// close if user taps outside caption area (tap image background)
+viewer?.addEventListener("click", (e) => {
+  if (e.target === viewer) closeViewer();
+});
+
+// close on ESC
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
+});
+
 
 // ---------- confetti ----------
 function popSparkles(count = 12) { popConfetti(count, true); }
