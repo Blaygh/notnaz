@@ -1,5 +1,8 @@
 /* app.js — Production-ready vanilla JS
-   + scrollable viewer + drag-down-to-close gesture (mobile friendly)
+   Viewer supports:
+   - swipe left/right to change images
+   - big close button
+   - drag down to close (when at top)
 */
 
 const $ = (sel) => document.querySelector(sel);
@@ -12,11 +15,8 @@ const toggleMusicBtn = $("#toggleMusic");
 const beginBtn = $("#beginBtn");
 const secretBtn = $("#secretBtn");
 const secretNote = $("#secretNote");
-const jumpBtn = $("#jumpBtn");
 
-const backToTopBtn = $("#backToTopBtn");
-const toQuestionBtn = $("#toQuestionBtn");
-const backToMomentsBtn = $("#backToMomentsBtn");
+const skipToQuestion = $("#skipToQuestion");
 const restartBtn = $("#restartBtn");
 
 const moments = $("#moments");
@@ -31,6 +31,10 @@ const answer = $("#answer");
 const confettiBtn = $("#confettiBtn");
 const copyBtn = $("#copyBtn");
 const copyStatus = $("#copyStatus");
+
+const promiseSlider = $("#promiseSlider");
+const sliderValue = $("#sliderValue");
+const promiseBox = $("#promiseBox");
 
 const canvas = $("#confetti");
 const ctx = canvas?.getContext("2d", { alpha: true });
@@ -121,15 +125,16 @@ window.addEventListener("load", () => {
 
 // ---------- navigation ----------
 beginBtn?.addEventListener("click", () => scrollToId("#memories"));
-jumpBtn?.addEventListener("click", () => scrollToId("#question"));
-backToTopBtn?.addEventListener("click", () => scrollToId("#start"));
-toQuestionBtn?.addEventListener("click", () => scrollToId("#question"));
-backToMomentsBtn?.addEventListener("click", () => scrollToId("#memories"));
+skipToQuestion?.addEventListener("click", () => scrollToId("#question"));
 
 restartBtn?.addEventListener("click", () => {
   secretNote && (secretNote.hidden = true);
   answer && (answer.hidden = true);
   copyStatus && (copyStatus.textContent = "");
+  sliderValue && (sliderValue.textContent = "0%");
+  if (promiseSlider) promiseSlider.value = "0";
+  if (promiseBox) promiseBox.innerHTML = `<p class="muted">Slide to 100% to reveal the promise.</p>`;
+
   if (noBtn) {
     noBtn.style.position = "";
     noBtn.style.left = "";
@@ -143,22 +148,77 @@ restartBtn?.addEventListener("click", () => {
 secretBtn?.addEventListener("click", () => {
   if (!secretNote) return;
   secretNote.hidden = !secretNote.hidden;
+  if (!secretNote.hidden) popConfetti(18, true);
 });
 
-// ---------- viewer layout (scrollable) ----------
+// ---------- promise slider ----------
+promiseSlider?.addEventListener("input", () => {
+  const v = Number(promiseSlider.value);
+  if (sliderValue) sliderValue.textContent = `${v}%`;
+
+  if (!promiseBox) return;
+  if (v >= 100) {
+    promiseBox.innerHTML = `
+      <p><strong>Promise unlocked:</strong></p>
+      <p>
+        I promise to keep choosing you—on the loud days and the quiet days.
+        I’ll celebrate your wins, hold you through the hard parts,
+        and keep making you laugh until we’re old.
+      </p>
+    `;
+    popConfetti(160);
+  } else if (v >= 60) {
+    promiseBox.innerHTML = `<p class="muted">You’re close… keep going 💚</p>`;
+  } else {
+    promiseBox.innerHTML = `<p class="muted">Slide to 100% to reveal the promise.</p>`;
+  }
+});
+
+// ---------- viewer (swipe left/right + drag-to-close) ----------
 let viewerContent = null;
+let momentButtons = [];
+let currentIndex = -1;
 
 function ensureViewerLayout() {
   if (!viewer) return;
 
-  // add drag hint (top)
+  // drag hint
   if (!viewer.querySelector(".drag-hint")) {
     const hint = document.createElement("div");
     hint.className = "drag-hint";
     viewer.insertBefore(hint, viewer.firstChild);
   }
 
-  // wrap image + caption into viewer-content once
+  // nav buttons
+  if (!viewer.querySelector("#viewerPrev")) {
+    const prev = document.createElement("button");
+    prev.id = "viewerPrev";
+    prev.type = "button";
+    prev.className = "viewer-nav viewer-prev";
+    prev.setAttribute("aria-label", "Previous photo");
+    prev.textContent = "‹";
+    prev.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      goPrev();
+    });
+    viewer.appendChild(prev);
+  }
+
+  if (!viewer.querySelector("#viewerNext")) {
+    const next = document.createElement("button");
+    next.id = "viewerNext";
+    next.type = "button";
+    next.className = "viewer-nav viewer-next";
+    next.setAttribute("aria-label", "Next photo");
+    next.textContent = "›";
+    next.addEventListener("click", (e) => {
+      e.preventDefault(); e.stopPropagation();
+      goNext();
+    });
+    viewer.appendChild(next);
+  }
+
+  // wrap image + caption once
   if (viewer.querySelector(".viewer-content")) {
     viewerContent = viewer.querySelector(".viewer-content");
     return;
@@ -173,19 +233,37 @@ function ensureViewerLayout() {
   viewer.appendChild(viewerContent);
 }
 
-function openViewer(src, caption) {
-  ensureViewerLayout();
-  if (!viewer || !viewerImg || !viewerCaption) return;
+function refreshMomentList() {
+  momentButtons = moments ? Array.from(moments.querySelectorAll(".moment")) : [];
+}
 
-  viewerImg.src = src;
-  viewerCaption.textContent = caption || "";
+function showIndex(idx) {
+  if (!viewer || !viewerImg || !viewerCaption) return;
+  if (!momentButtons.length) refreshMomentList();
+  if (!momentButtons.length) return;
+
+  const n = momentButtons.length;
+  currentIndex = (idx + n) % n;
+
+  const btn = momentButtons[currentIndex];
+  const src = btn.getAttribute("data-src") || btn.querySelector("img")?.src;
+  const caption = btn.getAttribute("data-caption") || "";
+
+  if (src) viewerImg.src = src;
+  viewerCaption.textContent = caption;
+
+  viewer.style.setProperty("--pull", "0px");
+}
+
+function openViewerAt(idx) {
+  ensureViewerLayout();
+  refreshMomentList();
 
   viewer.hidden = false;
   viewer.setAttribute("aria-hidden", "false");
-
-  // reset pull animation + scroll to top
-  viewer.style.setProperty("--pull", "0px");
   viewer.scrollTop = 0;
+
+  showIndex(idx);
 }
 
 function closeViewer() {
@@ -196,14 +274,23 @@ function closeViewer() {
   viewer.style.setProperty("--pull", "0px");
 }
 
+function goNext() {
+  if (currentIndex < 0) return;
+  showIndex(currentIndex + 1);
+}
+
+function goPrev() {
+  if (currentIndex < 0) return;
+  showIndex(currentIndex - 1);
+}
+
 // open from moments
 moments?.addEventListener("click", (e) => {
   const btn = e.target.closest(".moment");
   if (!btn) return;
-
-  const src = btn.getAttribute("data-src") || btn.querySelector("img")?.src;
-  const caption = btn.getAttribute("data-caption") || "";
-  if (src) openViewer(src, caption);
+  refreshMomentList();
+  const idx = momentButtons.indexOf(btn);
+  if (idx >= 0) openViewerAt(idx);
 });
 
 // close button
@@ -213,72 +300,83 @@ viewerClose?.addEventListener("click", (e) => {
   closeViewer();
 });
 
-// ESC to close
+// keyboard
 window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
+  if (!viewer || viewer.hidden) return;
+  if (e.key === "Escape") closeViewer();
+  if (e.key === "ArrowRight") goNext();
+  if (e.key === "ArrowLeft") goPrev();
 });
 
-// ---------- drag-down-to-close (while still scrollable) ----------
-let dragActive = false;
+// gestures
+let gestureActive = false;
+let startX = 0;
 let startY = 0;
 let pull = 0;
 
-function canStartDrag() {
-  // only allow drag-to-close if viewer is scrolled to top
+function atTopOfViewer() {
   return viewer && viewer.scrollTop <= 0;
 }
 
 viewer?.addEventListener("pointerdown", (e) => {
   if (!viewer || viewer.hidden) return;
-  if (!canStartDrag()) return;
-
-  // if they start dragging on caption text selection, ignore
-  const inCaption = e.target.closest(".viewer-caption");
-  if (inCaption) return;
-
-  dragActive = true;
+  gestureActive = true;
+  startX = e.clientX;
   startY = e.clientY;
   pull = 0;
   viewer.setPointerCapture?.(e.pointerId);
-});
+}, { passive: true });
 
 viewer?.addEventListener("pointermove", (e) => {
-  if (!dragActive || !viewer) return;
+  if (!gestureActive || !viewer) return;
 
+  const dx = e.clientX - startX;
   const dy = e.clientY - startY;
-  if (dy <= 0) {
-    pull = 0;
+
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+
+  // horizontal swipe — action on pointerup
+  if (absX > 14 && absX > absY * 1.2) {
+    e.preventDefault?.();
+    return;
+  }
+
+  // vertical pull-down to close (only from top)
+  if (atTopOfViewer() && dy > 0 && absY > absX) {
+    e.preventDefault?.();
+    pull = Math.min(dy, 220);
+    const eased = pull * 0.65;
+    viewer.style.setProperty("--pull", `${eased}px`);
+  }
+}, { passive: false });
+
+viewer?.addEventListener("pointerup", (e) => {
+  if (!gestureActive || !viewer) return;
+  gestureActive = false;
+
+  const dx = e.clientX - startX;
+  const dy = e.clientY - startY;
+
+  const absX = Math.abs(dx);
+  const absY = Math.abs(dy);
+
+  // horizontal swipe to change image
+  if (absX > 50 && absX > absY * 1.2) {
+    if (dx < 0) goNext();
+    else goPrev();
     viewer.style.setProperty("--pull", "0px");
     return;
   }
 
-  // apply resistance
-  pull = Math.min(dy, 220);
-  const eased = pull * 0.65;
-
-  viewer.style.setProperty("--pull", `${eased}px`);
-
-  // prevent page “rubber band” while dragging
-  e.preventDefault?.();
-}, { passive: false });
-
-viewer?.addEventListener("pointerup", () => {
-  if (!dragActive || !viewer) return;
-  dragActive = false;
-
-  // threshold to close
-  if (pull > 140) {
-    closeViewer();
-  } else {
-    // snap back
-    viewer.style.setProperty("--pull", "0px");
-  }
+  // vertical pull to close
+  if (pull > 140) closeViewer();
+  else viewer.style.setProperty("--pull", "0px");
 });
 
 viewer?.addEventListener("pointercancel", () => {
-  if (!viewer) return;
-  dragActive = false;
-  viewer.style.setProperty("--pull", "0px");
+  gestureActive = false;
+  viewer?.style.setProperty("--pull", "0px");
 });
 
 // ---------- valentine buttons ----------
@@ -310,7 +408,9 @@ function dodgeNo(fromClick=false) {
   if (fromClick) popConfetti(40, true);
 }
 
-// ---------- copy ----------
+confettiBtn?.addEventListener("click", () => popConfetti(180));
+
+// copy
 copyBtn?.addEventListener("click", async () => {
   const msg = "Will you be my Valentine? 💚🌹";
   try {
@@ -322,8 +422,6 @@ copyBtn?.addEventListener("click", async () => {
 });
 
 // ---------- confetti ----------
-confettiBtn?.addEventListener("click", () => popConfetti(180));
-
 function popConfetti(count = 160, sparkle = false) {
   if (!ctx) return;
 
