@@ -89,43 +89,36 @@
           (Replace the image URLs with yours.)
         </p>
       </div>
-
-<div class="gallery" id="gallery">
-  <!-- Replace each src with YOUR photo links (or ./assets/...) -->
-
-  <button class="tile" data-caption="First date — and somehow the world got quieter when you smiled.">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg" alt="Us - First date" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-  <button class="tile" data-caption="Miles apart — but you were still the closest thing to my heart.">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png" alt="Us - Miles apart" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-  <button class="tile" data-caption="Twinning — because even our vibes like to match. 💚">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg" alt="Us - Twinning" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-  <button class="tile" data-caption="In your element — I swear you glow when you’re doing what you love.">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg" alt="Her - In your element" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-  <button class="tile" data-caption="Under surveillance… but we don’t care  (they can watch us be happy).">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg" alt="Us - Under surveillance" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-  <button class="tile" data-caption="In your element (again) — and I’m still your biggest fan. Always.">
-    <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg" alt="element" loading="lazy" />
-    <span class="badge">tap me</span>
-  </button>
-
-
-      <div class="memory-caption" id="memoryCaption" aria-live="polite">
-        Tap a photo to reveal a message 💚
+      
+      <div class="moments" id="moments">
+        <!-- Replace src with your own images -->
+        <button class="moment" data-caption="First date — and somehow the world got quieter when you smiled.">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg" alt="Us - First date" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="Miles apart — but you were still the closest thing to my heart.">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png" alt="Us - Miles apart" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="Twinning — because even our vibes like to match. 💚">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg" alt="Us - Twinning" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="In your element — I swear you glow when you’re doing what you love.">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg" alt="Her - In your element" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="Under surveillance… but we don’t care 😌 (they can watch us be happy).">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg" alt="Us - Under surveillance" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="In your element (again) — and I’m still your biggest fan. Always.">
+          <img src="./assets/us6.jpg" alt="In your element again" loading="lazy" />
+        </button>
+      
+        <button class="moment" data-caption="Us — my favorite place to be.">
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg" alt="element" loading="lazy" />
+        </button>
       </div>
 
       <div class="nav-row">
@@ -228,6 +221,14 @@
         </div>
       </div>
     </dialog>
+
+    
+    <div id="viewer" class="viewer" hidden aria-hidden="true">
+      <button id="viewerClose" class="viewer-close" type="button" aria-label="Close">✕</button>
+    
+      <img id="viewerImg" alt="Full screen memory" />
+      <div class="viewer-caption" id="viewerCaption"></div>
+    </div>
 
 
   </main>
