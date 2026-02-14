@@ -1,4 +1,4 @@
-/* Production-ready vanilla JS for GitHub Pages */
+/* app.js — Production-ready vanilla JS for GitHub Pages */
 
 const $ = (sel) => document.querySelector(sel);
 
@@ -38,6 +38,7 @@ const ctx = canvas?.getContext("2d", { alpha: true });
 let confettiPieces = [];
 let confettiAnimating = false;
 
+// ---------- utilities ----------
 function scrollToId(id) {
   const el = document.querySelector(id);
   if (!el) return;
@@ -54,7 +55,7 @@ function showToast(msg) {
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
-// ---------- Canvas ----------
+// ---------- canvas sizing ----------
 function setCanvasSize() {
   if (!canvas || !ctx) return;
   const dpr = window.devicePixelRatio || 1;
@@ -67,12 +68,13 @@ function setCanvasSize() {
 window.addEventListener("resize", setCanvasSize);
 setCanvasSize();
 
-// ---------- Audio ----------
+// ---------- audio ----------
 function killGate() {
   if (!audioGate) return;
   audioGate.hidden = true;
   audioGate.style.display = "none";
-  // repaint nudge for iOS compositing
+
+  // iOS repaint nudge
   document.body.style.webkitTransform = "translateZ(0)";
   requestAnimationFrame(() => (document.body.style.webkitTransform = ""));
 }
@@ -131,7 +133,7 @@ window.addEventListener("load", () => {
   tryAutoplay();
 });
 
-// ---------- Navigation ----------
+// ---------- navigation ----------
 beginBtn?.addEventListener("click", () => scrollToId("#memories"));
 jumpBtn?.addEventListener("click", () => scrollToId("#question"));
 backToTopBtn?.addEventListener("click", () => scrollToId("#start"));
@@ -142,24 +144,52 @@ restartBtn?.addEventListener("click", () => {
   secretNote && (secretNote.hidden = true);
   answer && (answer.hidden = true);
   copyStatus && (copyStatus.textContent = "");
+  // reset NO button position if it moved
+  if (noBtn) {
+    noBtn.style.position = "";
+    noBtn.style.left = "";
+    noBtn.style.top = "";
+    noBtn.style.zIndex = "";
+  }
   scrollToId("#start");
 });
 
-// ---------- Secret ----------
+// ---------- secret ----------
 secretBtn?.addEventListener("click", () => {
   if (!secretNote) return;
   secretNote.hidden = !secretNote.hidden;
   if (!secretNote.hidden) popSparkles(14);
 });
 
-// ---------- Fullscreen Viewer ----------
+// ---------- fullscreen viewer (scroll-safe, close-safe) ----------
+function lockScroll() {
+  const y = window.scrollY || document.documentElement.scrollTop || 0;
+  document.body.dataset.scrollY = String(y);
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${y}px`;
+  document.body.style.left = "0";
+  document.body.style.right = "0";
+  document.body.style.width = "100%";
+}
+
+function unlockScroll() {
+  const y = parseInt(document.body.dataset.scrollY || "0", 10);
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.left = "";
+  document.body.style.right = "";
+  document.body.style.width = "";
+  delete document.body.dataset.scrollY;
+  window.scrollTo(0, y);
+}
+
 function openViewer(src, caption) {
   if (!viewer || !viewerImg || !viewerCaption) return;
   viewerImg.src = src;
   viewerCaption.textContent = caption || "";
   viewer.hidden = false;
   viewer.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+  lockScroll();
 }
 
 function closeViewer() {
@@ -167,24 +197,35 @@ function closeViewer() {
   viewer.hidden = true;
   viewer.setAttribute("aria-hidden", "true");
   viewerImg.src = "";
-  document.body.style.overflow = "";
+  unlockScroll();
 }
 
 moments?.addEventListener("click", (e) => {
   const btn = e.target.closest(".moment");
   if (!btn) return;
+
   const src = btn.getAttribute("data-src") || btn.querySelector("img")?.src;
   const caption = btn.getAttribute("data-caption") || "";
   if (src) openViewer(src, caption);
 });
 
-viewerClose?.addEventListener("click", closeViewer);
-viewer?.addEventListener("click", (e) => { if (e.target === viewer) closeViewer(); });
+viewerClose?.addEventListener("click", (e) => {
+  e.preventDefault();
+  e.stopPropagation();
+  closeViewer();
+});
+
+// tap the backdrop to close
+viewer?.addEventListener("click", (e) => {
+  if (e.target === viewer) closeViewer();
+});
+
+// ESC to close
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
 });
 
-// ---------- Valentine buttons ----------
+// ---------- valentine buttons ----------
 yesBtn?.addEventListener("click", () => {
   if (answer) answer.hidden = false;
   popConfetti(220);
@@ -203,7 +244,7 @@ function dodgeNo(fromClick=false) {
     "Try again 😂",
     "Nope 😌",
     "You can’t say no to me 💚",
-    "Okay, okay… still no 🙃",
+    "Okay okay… still no 🙃",
     "You know how this ends 😭"
   ];
   showToast(lines[dodge - 1] || "Hmm…");
@@ -224,7 +265,7 @@ function dodgeNo(fromClick=false) {
   popSparkles(fromClick ? 10 : 6);
 }
 
-// ---------- Copy ----------
+// ---------- copy ----------
 copyBtn?.addEventListener("click", async () => {
   const msg = "Will you be my Valentine? 💚🌹";
   try {
@@ -237,7 +278,7 @@ copyBtn?.addEventListener("click", async () => {
   }
 });
 
-// ---------- Confetti ----------
+// ---------- confetti ----------
 confettiBtn?.addEventListener("click", () => popConfetti(180));
 function popSparkles(count=12){ popConfetti(count, true); }
 
