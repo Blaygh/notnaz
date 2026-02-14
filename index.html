@@ -6,32 +6,30 @@
   <meta name="theme-color" content="#0b3d2e" />
   <title>My Jellyfish 🖤</title>
   <meta name="description" content="A small interactive love letter." />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <!-- Elegant + readable -->
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="./styles.css" />
+
+  <link rel="stylesheet" href="./styles.css?v=10" />
 </head>
 
 <body>
-<div id="audioGate" class="audio-gate" hidden>
-  <div class="audio-gate-card">
-    <p class="audio-title">One tiny tap 💚</p>
-    <p class="audio-sub">Tap to start the song (your phone blocks autoplay sometimes).</p>
-    <button id="audioGateBtn" class="btn primary big" type="button">Start music 🎶</button>
-  </div>
-</div>
-  <div class="bg" aria-hidden="true">
-    <div class="glow g1"></div>
-    <div class="glow g2"></div>
-    <div class="glow g3"></div>
+  <!-- AUDIO GATE (shown only if autoplay is blocked) -->
+  <div id="audioGate" class="audio-gate" hidden>
+    <div class="audio-gate-card">
+      <p class="audio-title">One tiny tap 💚</p>
+      <p class="audio-sub">Tap to start the song (your phone blocks autoplay sometimes).</p>
+      <button id="audioGateBtn" class="btn primary big" type="button">Start music 🎶</button>
+    </div>
   </div>
 
   <header class="topbar">
     <div class="brand">
       <span class="dot"></span>
-      <span> <strong>Her</strong></span>
+      <span><strong>Her</strong></span>
     </div>
+
     <div class="topbar-actions">
       <button id="toggleMusic" class="btn ghost" type="button" aria-pressed="false" title="Toggle music">
         ♫ Music
@@ -46,10 +44,10 @@
     <!-- HERO -->
     <section class="card hero" id="start">
       <div class="hero-text">
-        <p class="kicker"Good Morning Pineapple 🍍</p>
-        <h1>I made this for you</h1>
+        <p class="kicker">Good Morning Pineapple 🍍</p>
+        <h1>I made this for you.</h1>
         <p class="sub">
-            A little page of us — tap through the moments… then answer one question at the end 💚
+          A little page of us — tap through the moments… then answer one question at the end 💚
         </p>
 
         <div class="cta-row">
@@ -57,7 +55,7 @@
             Start the little journey ✨
           </button>
           <button class="btn" id="secretBtn" type="button" title="A small surprise">
-            Tap  a secret 💌
+            Tap a secret 💌
           </button>
         </div>
 
@@ -72,7 +70,7 @@
           <img
             id="heroPhoto"
             src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1061.jpeg"
-            alt="A romantic placeholder image"
+            alt="Us"
             loading="eager"
           />
           <figcaption>brewed in cupids favorite teapot</figcaption>
@@ -80,117 +78,81 @@
       </div>
     </section>
 
-    <!-- MEMORY GALLERY -->
-    <section class="card" id="memories" data-step="2">
+    <!-- MOMENTS -->
+    <section class="card" id="memories">
       <div class="section-head">
         <h2>Little moments, big feelings</h2>
         <p class="muted">
-          Tap each photo. Each one unlocks a short memory.
-          (Replace the image URLs with yours.)
+          Tap a photo to open it full-screen with the memory underneath 💚
         </p>
       </div>
-      
+
       <div class="moments" id="moments">
-        <!-- Replace src with your own images -->
         <button class="moment" data-caption="First date — and somehow the world got quieter when you smiled.">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg" alt="Us - First date" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg" alt="First date" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="Miles apart — but you were still the closest thing to my heart.">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png" alt="Us - Miles apart" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png" alt="Miles apart" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="Twinning — because even our vibes like to match. 💚">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg" alt="Us - Twinning" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg" alt="Twinning" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="In your element — I swear you glow when you’re doing what you love.">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg" alt="Her - In your element" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg" alt="In your element" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="Under surveillance… but we don’t care 😌 (they can watch us be happy).">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg" alt="Us - Under surveillance" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg" alt="Under surveillance" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="In your element (again) — and I’m still your biggest fan. Always.">
           <img src="./assets/us6.jpg" alt="In your element again" loading="lazy" />
         </button>
-      
+
         <button class="moment" data-caption="Us — my favorite place to be.">
-          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg" alt="element" loading="lazy" />
+          <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg" alt="Us" loading="lazy" />
         </button>
       </div>
 
       <div class="nav-row">
-        <button class="btn" data-prev="#goodmorning">← Back</button>
-        <button class="btn primary" data-next="#promise">Next → A little promise</button>
-      </div>
-    </section>
-
-    <!-- PROMISE -->
-    <section class="card" id="promise" data-step="3">
-      <div class="section-head">
-        <h2>A little promise</h2>
-        <p class="muted">Slide to “unlock” it.</p>
-      </div>
-
-      <div class="panel">
-        <label class="slider-label" ="promiseSlider">
-          <span>Unlock level:</span>
-          <span id="sliderValue" class="pill">0%</span>
-        </label>
-        <input id="promiseSlider" class="slider" type="range" min="0" max="100" value="0" />
-
-        <div class="promise-box" id="promiseBox" aria-live="polite">
-          <p class="muted">Slide to 100% to reveal the promise.</p>
-        </div>
-
-        <div class="nav-row">
-          <button class="btn" data-prev="#memories">← Back</button>
-          <button class="btn primary" data-next="#question">Next → The question</button>
-        </div>
+        <button class="btn" data-prev="#start">← Back</button>
+        <button class="btn primary" data-next="#question">Next → The question</button>
       </div>
     </section>
 
     <!-- FINAL QUESTION -->
-    <section class="card final" id="question" data-step="4">
-      <div class="section-head">
-        <h2>Okay… deep breath 😌</h2>
-        <p class="muted">
-          This part is intentionally dramatic.
-          Please read it like a movie scene.
-        </p>
-      </div>
-    <div class="final-box">
-      <h3 class="big-question">Will you be my Valentine?</h3>
-    
-      <div class="buttons">
-        <button class="btn primary big" id="yesBtn" type="button">Yes 💚</button>
-        <button class="btn danger big" id="noBtn" type="button">No 🙃</button>
-      </div>
-    
-      <div class="answer" id="answer" hidden>
-        <p class="answer-title">YAYYYYY!!!</p>
-        <p>You just made me the happiest person ever 😭💚</p>
-    
-        <div class="mini-actions">
-          <button class="btn" id="confettiBtn" type="button">More confetti 🎉</button>
-          <button class="btn ghost" id="copyBtn" type="button">Copy a cute message</button>
+    <section class="card final" id="question">
+      <div class="final-box">
+        <h3 class="big-question">Will you be my Valentine?</h3>
+
+        <div class="buttons">
+          <button class="btn primary big" id="yesBtn" type="button">Yes 💚</button>
+          <button class="btn danger big" id="noBtn" type="button">No 🙃</button>
         </div>
-    
-        <p class="muted small" id="copyStatus" aria-live="polite"></p>
-      </div>
-    </div>
 
-      </div>
+        <div class="answer" id="answer" hidden>
+          <p class="answer-title">YAYYYYY!!!</p>
+          <p>You just made me the happiest person ever 😭💚</p>
 
-      <div class="nav-row">
-        <button class="btn" data-prev="#promise">← Back</button>
-        <button class="btn ghost" data-next="#start">Back to top ↑</button>
+          <div class="mini-actions">
+            <button class="btn" id="confettiBtn" type="button">More confetti 🎉</button>
+            <button class="btn ghost" id="copyBtn" type="button">Copy a cute message</button>
+          </div>
+
+          <p class="muted small" id="copyStatus" aria-live="polite"></p>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn" data-prev="#memories">← Back</button>
+          <button class="btn ghost" data-next="#start">Back to top ↑</button>
+        </div>
       </div>
     </section>
 
-    <!-- AUDIO (optional) -->
+    <!-- AUDIO -->
     <audio id="bgMusic" preload="auto" loop playsinline>
       <source src="./assets/song.mp3" type="audio/mpeg" />
     </audio>
@@ -198,25 +160,22 @@
     <!-- CONFETTI CANVAS -->
     <canvas id="confetti" aria-hidden="true"></canvas>
 
+    <!-- MODAL -->
     <dialog id="modal" class="modal">
       <div class="modal-inner">
         <p id="modalText"></p>
-    
         <div class="modal-actions">
-          <button id="modalCloseBtn" class="btn primary" type="button">Kinda Sorta?</button>
+          <button id="modalCloseBtn" class="btn primary" type="button">Okay 💚</button>
         </div>
       </div>
     </dialog>
 
-    
+    <!-- FULLSCREEN VIEWER -->
     <div id="viewer" class="viewer" hidden aria-hidden="true">
       <button id="viewerClose" class="viewer-close" type="button" aria-label="Close">✕</button>
-    
       <img id="viewerImg" alt="Full screen memory" />
       <div class="viewer-caption" id="viewerCaption"></div>
     </div>
-
-
   </main>
 
   <footer class="footer">
@@ -227,6 +186,6 @@
     </p>
   </footer>
 
-  <script src="./app.js"></script>
+  <script src="./app.js?v=10" defer></script>
 </body>
 </html>
