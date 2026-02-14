@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#0b3d2e" />
+  <title>For You 💚</title>
+  <meta name="description" content="A small interactive love letter." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Elegant + readable -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body>
+  <div class="bg" aria-hidden="true">
+    <div class="glow g1"></div>
+    <div class="glow g2"></div>
+    <div class="glow g3"></div>
+  </div>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="dot"></span>
+      <span>For <strong>Her</strong></span>
+    </div>
+    <div class="topbar-actions">
+      <button id="toggleMusic" class="btn ghost" type="button" aria-pressed="false" title="Toggle music">
+        ♫ Music
+      </button>
+      <button id="skipToQuestion" class="btn ghost" type="button" title="Skip to the final question">
+        Jump to the question →
+      </button>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <!-- HERO -->
+    <section class="card hero" id="start">
+      <div class="hero-text">
+        <p class="kicker">A tiny website… with a big message 💚</p>
+        <h1>Hey love, I made you something.</h1>
+        <p class="sub">
+          It’s interactive. It’s ours. And it ends with a question you’ll probably see coming—
+          but I hope it still makes you smile.
+        </p>
+
+        <div class="cta-row">
+          <button class="btn primary" id="beginBtn" type="button">
+            Start the little journey ✨
+          </button>
+          <button class="btn" id="secretBtn" type="button" title="A small surprise">
+            Tap for a secret 💌
+          </button>
+        </div>
+
+        <div class="mini-note" id="secretNote" hidden>
+          <span class="pill">secret unlocked</span>
+          <p>Every time you smile, my whole day goes green—in the best way. 🌿</p>
+        </div>
+      </div>
+
+      <div class="hero-media">
+        <figure class="photo-frame">
+          <img
+            id="heroPhoto"
+            src="https://images.unsplash.com/photo-1529634806980-85c3dd6d34ac?auto=format&fit=crop&w=1200&q=80"
+            alt="A romantic placeholder image (replace with your photo)"
+            loading="eager"
+          />
+          <figcaption>Replace this with a favorite photo of you two.</figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- GOOD MORNING SECTION -->
+    <section class="card" id="goodmorning" data-step="1">
+      <div class="section-head">
+        <h2>Goodmorning Pineapple 🍍</h2>
+        <p class="muted">A small ritual, on a small website, for the person I love.</p>
+      </div>
+
+      <div class="grid two">
+        <div class="panel">
+          <p>
+            Before anything else today, I just want you to know:
+            <strong>I’m proud of you</strong>. I’m grateful for you.
+          </p>
+
+          <div class="gm-actions">
+            <button class="btn primary" id="gmBtn" type="button">Open your morning note ☀️</button>
+            <button class="btn" id="gmReplay" type="button">Replay sparkle ✨</button>
+          </div>
+
+          <div class="note" id="gmNote" hidden>
+            <p class="note-title">Good morning, my Pineapple.</p>
+            <p>
+              You make life feel lighter, funnier, and more beautiful.
+              Today, take it easy on yourself. You’re doing amazing.
+            </p>
+            <p class="muted small">— from me, with a lot of love 💚</p>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="quiz">
+            <p class="quiz-title">Quick check-in:</p>
+            <p class="muted">How are you feeling right now?</p>
+            <div class="choices" role="group" aria-label="Mood selector">
+              <button class="chip" data-mood="Happy 😊">Happy 😊</button>
+              <button class="chip" data-mood="Soft 🥹">Soft 🥹</button>
+              <button class="chip" data-mood="Tired 😴">Tired 😴</button>
+              <button class="chip" data-mood="Stressed 😵‍💫">Stressed 😵‍💫</button>
+            </div>
+            <div class="mood-result" id="moodResult" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn primary" data-next="#memories">Next → Our memories</button>
+      </div>
+    </section>
+
+    <!-- MEMORY GALLERY -->
+    <section class="card" id="memories" data-step="2">
+      <div class="section-head">
+        <h2>Little moments, big feelings</h2>
+        <p class="muted">
+          Tap each photo. Each one unlocks a short memory.
+          (Replace the image URLs with yours.)
+        </p>
+      </div>
+
+      <div class="gallery" id="gallery">
+        <!-- Replace these src values with YOUR image URLs -->
+        <button class="tile" data-caption="The day I realized I’m never letting you go.">
+          <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?auto=format&fit=crop&w=900&q=80"
+               alt="Placeholder 1 (replace with your photo)" loading="lazy" />
+          <span class="badge">tap me</span>
+        </button>
+
+        <button class="tile" data-caption="When your laugh made the whole room feel warmer.">
+          <img src="https://images.unsplash.com/photo-1495555687392-553fcb0d2283?auto=format&fit=crop&w=900&q=80"
+               alt="Placeholder 2 (replace with your photo)" loading="lazy" />
+          <span class="badge">tap me</span>
+        </button>
+
+        <button class="tile" data-caption="My favorite view: you, doing absolutely anything.">
+          <img src="https://images.unsplash.com/photo-1520975682031-a51f9747d0b1?auto=format&fit=crop&w=900&q=80"
+               alt="Placeholder 3 (replace with your photo)" loading="lazy" />
+          <span class="badge">tap me</span>
+        </button>
+
+        <button class="tile" data-caption="Every ‘small’ day with you is secretly my favorite.">
+          <img src="https://images.unsplash.com/photo-1526662092594-e98c1e356d6a?auto=format&fit=crop&w=900&q=80"
+               alt="Placeholder 4 (replace with your photo)" loading="lazy" />
+          <span class="badge">tap me</span>
+        </button>
+      </div>
+
+      <div class="memory-caption" id="memoryCaption" aria-live="polite">
+        Tap a photo to reveal a message 💚
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" data-prev="#goodmorning">← Back</button>
+        <button class="btn primary" data-next="#promise">Next → A little promise</button>
+      </div>
+    </section>
+
+    <!-- PROMISE -->
+    <section class="card" id="promise" data-step="3">
+      <div class="section-head">
+        <h2>A little promise</h2>
+        <p class="muted">Slide to “unlock” it.</p>
+      </div>
+
+      <div class="panel">
+        <label class="slider-label" for="promiseSlider">
+          <span>Unlock level:</span>
+          <span id="sliderValue" class="pill">0%</span>
+        </label>
+        <input id="promiseSlider" class="slider" type="range" min="0" max="100" value="0" />
+
+        <div class="promise-box" id="promiseBox" aria-live="polite">
+          <p class="muted">Slide to 100% to reveal the promise.</p>
+        </div>
+
+        <div class="nav-row">
+          <button class="btn" data-prev="#memories">← Back</button>
+          <button class="btn primary" data-next="#question">Next → The question</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- FINAL QUESTION -->
+    <section class="card final" id="question" data-step="4">
+      <div class="section-head">
+        <h2>Okay… deep breath 😌</h2>
+        <p class="muted">
+          This part is intentionally dramatic.
+          Please read it like a movie scene.
+        </p>
+      </div>
+
+      <div class="final-box">
+        <p class="final-line">
+          I love you in the calm days, the busy days, and every in-between day.
+        </p>
+        <p class="final-line">
+          And if you’re down…
+          I’d love to make this Valentine’s Day ours. 💚🌹
+        </p>
+
+        <h3 class="big-question">Will you be my Valentine?</h3>
+
+        <div class="buttons">
+          <button class="btn primary big" id="yesBtn" type="button">Yes 💚</button>
+          <button class="btn danger big" id="noBtn" type="button">No 🙃</button>
+        </div>
+
+        <div class="answer" id="answer" hidden>
+          <p class="answer-title">YAYYYYY!!!</p>
+          <p>
+            You just made me the happiest person ever.
+            Screenshot this and send it to me right now 😭💚
+          </p>
+
+          <div class="mini-actions">
+            <button class="btn" id="confettiBtn" type="button">More confetti 🎉</button>
+            <button class="btn ghost" id="copyBtn" type="button">Copy a cute message</button>
+          </div>
+
+          <p class="muted small" id="copyStatus" aria-live="polite"></p>
+        </div>
+
+        <p class="muted small footnote">
+          Tip: Put this site link in a text, then tell her “open when you wake up.” 🍍
+        </p>
+      </div>
+
+      <div class="nav-row">
+        <button class="btn" data-prev="#promise">← Back</button>
+        <button class="btn ghost" data-next="#start">Back to top ↑</button>
+      </div>
+    </section>
+
+    <!-- AUDIO (optional) -->
+    <audio id="bgMusic" preload="none" loop>
+      <!-- Replace with your own mp3 hosted somewhere, or remove entirely -->
+      <source src="" type="audio/mpeg" />
+    </audio>
+
+    <!-- CONFETTI CANVAS -->
+    <canvas id="confetti" aria-hidden="true"></canvas>
+
+    <!-- MODAL -->
+    <dialog id="modal" class="modal">
+      <div class="modal-inner">
+        <p id="modalText"></p>
+        <form method="dialog">
+          <button class="btn primary" type="submit">Okay 💚</button>
+        </form>
+      </div>
+    </dialog>
+
+  </main>
+
+  <footer class="footer">
+    <p>
+      Made with 💚 + 🌹
+      <span class="sep">•</span>
+      <button class="linklike" id="restartBtn" type="button">Restart</button>
+    </p>
+  </footer>
+
+  <script src="./app.js"></script>
+</body>
+</html>
