@@ -14,20 +14,6 @@ const viewerImg = $("#viewerImg");
 const viewerCaption = $("#viewerCaption");
 const viewerClose = $("#viewerClose");
 
-const gmBtn = $("#gmBtn");
-const gmNote = $("#gmNote");
-const gmReplay = $("#gmReplay");
-
-const moodResult = $("#moodResult");
-const chips = document.querySelectorAll(".chip");
-
-const gallery = $("#gallery");
-const memoryCaption = $("#memoryCaption");
-
-const promiseSlider = $("#promiseSlider");
-const sliderValue = $("#sliderValue");
-const promiseBox = $("#promiseBox");
-
 const yesBtn = $("#yesBtn");
 const noBtn = $("#noBtn");
 const answer = $("#answer");
@@ -41,12 +27,11 @@ const modalCloseBtn = $("#modalCloseBtn");
 
 const toggleMusicBtn = $("#toggleMusic");
 const bgMusic = $("#bgMusic");
-
 const audioGate = $("#audioGate");
 const audioGateBtn = $("#audioGateBtn");
 
 const canvas = $("#confetti");
-const ctx = canvas.getContext("2d", { alpha: true });
+const ctx = canvas?.getContext("2d", { alpha: true });
 
 let confettiPieces = [];
 let confettiAnimating = false;
@@ -61,28 +46,28 @@ function scrollToId(id) {
 }
 
 function openModal(text) {
+  if (!modal || !modalText) return alert(text);
   modalText.textContent = text;
   if (typeof modal.showModal === "function") modal.showModal();
   else alert(text);
 }
-// close when clicking the button
+
+// close modal
 modalCloseBtn?.addEventListener("click", () => {
   if (modal?.open) modal.close();
 });
-
-// close when clicking outside the modal content
 modal?.addEventListener("click", (e) => {
   if (e.target === modal) modal.close();
 });
-
-// close with ESC (some browsers do this automatically, but we enforce it)
 window.addEventListener("keydown", (e) => {
   if (e.key === "Escape" && modal?.open) modal.close();
 });
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
+// ---------- confetti canvas sizing ----------
 function setCanvasSize() {
+  if (!canvas || !ctx) return;
   const dpr = window.devicePixelRatio || 1;
   canvas.width = Math.floor(window.innerWidth * dpr);
   canvas.height = Math.floor(window.innerHeight * dpr);
@@ -93,56 +78,61 @@ function setCanvasSize() {
 window.addEventListener("resize", setCanvasSize);
 setCanvasSize();
 
-// ---------- audio: autoplay on open (best effort) ----------
+// ---------- audio ----------
+function safariRepaintFix() {
+  // clears lingering backdrop-filter compositor layers on iOS
+  document.body.style.transform = "translateZ(0)";
+  requestAnimationFrame(() => {
+    document.body.style.transform = "";
+  });
+}
+
+function killAudioGate() {
+  if (!audioGate) return;
+  audioGate.hidden = true;
+  audioGate.style.display = "none";
+  audioGate.style.backdropFilter = "none";
+  audioGate.style.webkitBackdropFilter = "none";
+  audioGate.remove();
+  safariRepaintFix();
+}
+
 async function tryAutoplay() {
-  if (!bgMusic || !$src) return; // no audio file set
+  if (!bgMusic || !$src) return;
 
   bgMusic.loop = true;
   bgMusic.volume = 0.85;
 
-try {
-  await bgMusic.play();
-  toggleMusicBtn?.setAttribute("aria-pressed", "true");
-  if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-
-  if (audioGate) audioGate.remove(); // ✅ remove on success autoplay
-} catch (e) {
-  if (audioGate) audioGate.hidden = false;
+  try {
+    await bgMusic.play();
+    toggleMusicBtn?.setAttribute("aria-pressed", "true");
+    if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
+    killAudioGate();
+  } catch {
+    // autoplay blocked
+    if (audioGate) audioGate.hidden = false;
+  }
 }
-}
 
-// If autoplay is blocked, the gate button enables it.
 audioGateBtn?.addEventListener("click", async () => {
   try {
     await bgMusic.play();
-
-    // ✅ kill the gate completely
-    if (audioGate) {
-      audioGate.hidden = true;             // triggers CSS rule above
-      audioGate.style.display = "none";    // immediate
-      audioGate.style.backdropFilter = "none";
-      audioGate.style.webkitBackdropFilter = "none";
-      audioGate.remove();                  // remove from DOM (final guarantee)
-    }
-
     toggleMusicBtn?.setAttribute("aria-pressed", "true");
     if (toggleMusicBtn) toggleMusicBtn.textContent = "♫ Music: On";
-  } catch (e) {
+    killAudioGate();
+  } catch {
     alert("Tap again — some phones block audio the first time 💚");
   }
 });
 
-
-
-// Also attempt autoplay as soon as page loads
 window.addEventListener("load", () => {
   tryAutoplay();
 });
 
-// Music toggle stays useful
+// music toggle
 toggleMusicBtn?.addEventListener("click", async () => {
   if (!bgMusic || !$src) {
-    openModal("Add ./assets/song.mp3 to enable music 🎶");
+    openModal("Add assets/song.mp3 to enable music 🎶");
     return;
   }
 
@@ -156,13 +146,12 @@ toggleMusicBtn?.addEventListener("click", async () => {
       toggleMusicBtn.setAttribute("aria-pressed", "false");
       toggleMusicBtn.textContent = "♫ Music";
     }
-  } catch (e) {
-    // Show gate if needed
+  } catch {
     if (audioGate) audioGate.hidden = false;
   }
 });
 
-// ---------- navigation buttons ----------
+// ---------- navigation ----------
 document.addEventListener("click", (e) => {
   const next = e.target.closest("[data-next]");
   const prev = e.target.closest("[data-prev]");
@@ -174,83 +163,58 @@ skipToQuestion?.addEventListener("click", () => scrollToId("#question"));
 beginBtn?.addEventListener("click", () => scrollToId("#memories"));
 
 restartBtn?.addEventListener("click", () => {
-  secretNote.hidden = true;
-  gmNote.hidden = true;
-  moodResult.textContent = "";
-  memoryCaption.textContent = "Tap a photo to reveal a message 💚";
-  promiseSlider.value = "0";
-  sliderValue.textContent = "0%";
-  promiseBox.innerHTML = `<p class="muted">Slide to 100% to reveal the promise.</p>`;
-  answer.hidden = true;
-  copyStatus.textContent = "";
+  secretNote && (secretNote.hidden = true);
+  answer && (answer.hidden = true);
+  copyStatus && (copyStatus.textContent = "");
   scrollToId("#start");
 });
 
-// ---------- secret note ----------
+// ---------- secret ----------
 secretBtn?.addEventListener("click", () => {
+  if (!secretNote) return;
   secretNote.hidden = !secretNote.hidden;
   if (!secretNote.hidden) popSparkles(14);
 });
 
-// ---------- Good morning ----------
-gmBtn?.addEventListener("click", () => {
-  gmNote.hidden = false;
-  popSparkles(18);
-});
-gmReplay?.addEventListener("click", () => popSparkles(22));
+// ---------- fullscreen viewer for moments ----------
+function openViewer(src, caption) {
+  if (!viewer || !viewerImg || !viewerCaption) return;
+  viewerImg.src = src;
+  viewerCaption.textContent = caption || "";
+  viewer.hidden = false;
+  viewer.setAttribute("aria-hidden", "false");
+  document.body.style.overflow = "hidden";
+}
 
-// ---------- mood chips ----------
-chips.forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const mood = btn.getAttribute("data-mood");
-    const responses = {
-      "Happy 😊": "That makes me smile. Let’s keep that energy all day 💚",
-      "Soft 🥹": "Come here. (Virtually.) I’m holding your hand 🫶",
-      "Tired 😴": "Okay, Pineapple. Be gentle with yourself today 🍍💚",
-      "Stressed 😵‍💫": "Breathe with me: in… out… You’ve got this—and I’ve got you."
-    };
-    moodResult.textContent = responses[mood] || `Noted: ${mood}`;
-    popSparkles(10);
-  });
-});
+function closeViewer() {
+  if (!viewer || !viewerImg) return;
+  viewer.hidden = true;
+  viewer.setAttribute("aria-hidden", "true");
+  viewerImg.src = "";
+  document.body.style.overflow = "";
+}
 
-// ---------- gallery ----------
-gallery?.addEventListener("click", (e) => {
-  const tile = e.target.closest(".tile");
-  if (!tile) return;
-  const caption = tile.getAttribute("data-caption") || "💚";
-  memoryCaption.textContent = caption;
-  popSparkles(10);
+moments?.addEventListener("click", (e) => {
+  const btn = e.target.closest(".moment");
+  if (!btn) return;
+  const img = btn.querySelector("img");
+  const caption = btn.getAttribute("data-caption") || "";
+  if (img?.src) openViewer(img.src, caption);
 });
 
-// ---------- promise slider ----------
-promiseSlider?.addEventListener("input", () => {
-  const v = Number(promiseSlider.value);
-  sliderValue.textContent = `${v}%`;
-
-  if (v >= 100) {
-    promiseBox.innerHTML = `
-      <p><strong>Promise unlocked:</strong></p>
-      <p>
-        I promise to keep choosing you—on the loud days and the quiet days.
-        I’ll celebrate your wins, hold you through the hard parts,
-        and keep making you laugh until we’re old.
-      </p>
-      <p class="muted small">Now… scroll. Because the question is waiting 😌</p>
-    `;
-    popConfetti(160);
-  } else if (v >= 60) {
-    promiseBox.innerHTML = `<p class="muted">You’re close… keep going 💚</p>`;
-  } else {
-    promiseBox.innerHTML = `<p class="muted">Slide to 100% to reveal the promise.</p>`;
-  }
+viewerClose?.addEventListener("click", closeViewer);
+viewer?.addEventListener("click", (e) => {
+  if (e.target === viewer) closeViewer();
+});
+window.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
 });
 
-// ---------- final question buttons ----------
+// ---------- final question ----------
 yesBtn?.addEventListener("click", () => {
-  answer.hidden = false;
+  if (answer) answer.hidden = false;
   popConfetti(220);
-  openModal("You said YES 💚🌹 I love you!!!");
+  openModal("YAY 💚🌹");
 });
 
 let dodgeLevel = 0;
@@ -258,18 +222,18 @@ noBtn?.addEventListener("mouseenter", () => dodgeNoButton());
 noBtn?.addEventListener("click", () => dodgeNoButton(true));
 
 function dodgeNoButton(fromClick = false) {
-  dodgeLevel = clamp(dodgeLevel + 1, 0, 8);
+  dodgeLevel = clamp(dodgeLevel + 1, 0, 7);
 
   const lines = [
     "Wait… are you sure? 😳",
     "Try again 😂",
     "I’m gonna pretend I didn’t see that.",
-    "I hope you know you can't say no to me",
-    "There you go again trying to be stubborn",
-    "You dont learn huh.",
-    "You know how this will end",
-    
+    "You can’t say no to me 😌",
+    "There you go again being stubborn",
+    "You don’t learn huh 😭",
+    "You know how this ends 💚",
   ];
+
   openModal(lines[dodgeLevel - 1] || "Hmm…");
 
   const rect = noBtn.getBoundingClientRect();
@@ -291,55 +255,21 @@ function dodgeNoButton(fromClick = false) {
 confettiBtn?.addEventListener("click", () => popConfetti(180));
 
 copyBtn?.addEventListener("click", async () => {
-  const msg = "She said YES 💚🌹 Screenshot this: Will you be my Valentine?";
+  const msg = "She said YES 💚🌹 Will you be my Valentine?";
   try {
     await navigator.clipboard.writeText(msg);
-    copyStatus.textContent = "Copied! Now paste it and send it to me 😭💚";
-  } catch (err) {
-    copyStatus.textContent = "Couldn’t copy automatically—no worries, just screenshot 💚";
+    if (copyStatus) copyStatus.textContent = "Copied 💚";
+  } catch {
+    if (copyStatus) copyStatus.textContent = "Couldn’t copy — screenshot works too 💚";
   }
 });
-
-function openViewer(src, caption) {
-  viewerImg.src = src;
-  viewerCaption.textContent = caption || "";
-  viewer.hidden = false;
-  viewer.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
-}
-
-function closeViewer() {
-  viewer.hidden = true;
-  viewer.setAttribute("aria-hidden", "true");
-  viewerImg.src = "";
-  document.body.style.overflow = "";
-}
-
-moments?.addEventListener("click", (e) => {
-  const btn = e.target.closest(".moment");
-  if (!btn) return;
-  const img = btn.querySelector("img");
-  const caption = btn.getAttribute("data-caption") || "";
-  if (img?.src) openViewer(img.src, caption);
-});
-
-viewerClose?.addEventListener("click", closeViewer);
-
-// close if user taps outside caption area (tap image background)
-viewer?.addEventListener("click", (e) => {
-  if (e.target === viewer) closeViewer();
-});
-
-// close on ESC
-window.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && viewer && !viewer.hidden) closeViewer();
-});
-
 
 // ---------- confetti ----------
 function popSparkles(count = 12) { popConfetti(count, true); }
 
 function popConfetti(count = 160, isSparkle = false) {
+  if (!ctx) return;
+
   const colors = isSparkle
     ? ["#2ee59d", "#ff4d7d", "#ffd479", "rgba(255,255,255,.9)"]
     : ["#2ee59d", "#ff4d7d", "#ffd479", "rgba(255,255,255,.85)"];
@@ -368,6 +298,8 @@ function popConfetti(count = 160, isSparkle = false) {
 }
 
 function tickConfetti() {
+  if (!ctx) return;
+
   ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
   confettiPieces = confettiPieces.filter(p => p.life > 0);
 
