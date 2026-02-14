@@ -3,39 +3,40 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <meta name="theme-color" content="#0b3d2e" />
-  <title>My Jellyfish 🖤</title>
+  <meta name="theme-color" content="#061a12" />
+  <title>Good Morning, Pineapple 🍍</title>
   <meta name="description" content="A small interactive love letter." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <link rel="stylesheet" href="./styles.css?v=10" />
+  <link rel="stylesheet" href="styles.css?v=1" />
 </head>
 
 <body>
-  <!-- AUDIO GATE (shown only if autoplay is blocked) -->
+  <!-- AUDIO GATE (only appears if autoplay is blocked) -->
   <div id="audioGate" class="audio-gate" hidden>
-    <div class="audio-gate-card">
-      <p class="audio-title">One tiny tap 💚</p>
-      <p class="audio-sub">Tap to start the song (your phone blocks autoplay sometimes).</p>
+    <div class="audio-gate-card" role="dialog" aria-modal="true" aria-labelledby="audioGateTitle">
+      <h2 id="audioGateTitle">One tiny tap 💚</h2>
+      <p>Your phone may block autoplay. Tap once to start the music.</p>
       <button id="audioGateBtn" class="btn primary big" type="button">Start music 🎶</button>
+      <p class="tiny muted">Tip: If it’s still silent, turn off Silent Mode.</p>
     </div>
   </div>
 
   <header class="topbar">
     <div class="brand">
-      <span class="dot"></span>
-      <span><strong>Her</strong></span>
+      <span class="dot" aria-hidden="true"></span>
+      <span class="brand-text">For <strong>Her</strong></span>
     </div>
 
     <div class="topbar-actions">
       <button id="toggleMusic" class="btn ghost" type="button" aria-pressed="false" title="Toggle music">
         ♫ Music
       </button>
-      <button id="skipToQuestion" class="btn ghost" type="button" title="Skip to the final question">
-        Jump to the question →
+      <button id="jumpBtn" class="btn ghost" type="button" title="Jump to the question">
+        Jump →
       </button>
     </div>
   </header>
@@ -47,14 +48,14 @@
         <p class="kicker">Good Morning Pineapple 🍍</p>
         <h1>I made this for you.</h1>
         <p class="sub">
-          A little page of us — tap through the moments… then answer one question at the end 💚
+          Tap through our little moments… then answer one question at the end 💚
         </p>
 
         <div class="cta-row">
           <button class="btn primary" id="beginBtn" type="button">
-            Start the little journey ✨
+            Start ✨
           </button>
-          <button class="btn" id="secretBtn" type="button" title="A small surprise">
+          <button class="btn" id="secretBtn" type="button">
             Tap a secret 💌
           </button>
         </div>
@@ -65,17 +66,14 @@
         </div>
       </div>
 
-      <div class="hero-media">
-        <figure class="photo-frame">
-          <img
-            id="heroPhoto"
-            src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1061.jpeg"
-            alt="Us"
-            loading="eager"
-          />
-          <figcaption>brewed in cupids favorite teapot</figcaption>
-        </figure>
-      </div>
+      <figure class="photo-frame">
+        <img
+          src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1061.jpeg"
+          alt="Us"
+          loading="eager"
+        />
+        <figcaption>brewed in cupid’s favorite teapot</figcaption>
+      </figure>
     </section>
 
     <!-- MOMENTS -->
@@ -83,49 +81,58 @@
       <div class="section-head">
         <h2>Little moments, big feelings</h2>
         <p class="muted">
-          Tap a photo to open it full-screen with the memory underneath 💚
+          Scroll sideways. Tap a photo to open it full screen with its memory.
         </p>
       </div>
 
-      <div class="moments" id="moments">
-        <button class="moment" data-caption="First date — and somehow the world got quieter when you smiled.">
+      <div class="moments" id="moments" aria-label="Moments scroller">
+        <button class="moment" type="button"
+          data-caption="First date — and somehow the world got quieter when you smiled."
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_0964.jpeg" alt="First date" loading="lazy" />
         </button>
 
-        <button class="moment" data-caption="Miles apart — but you were still the closest thing to my heart.">
+        <button class="moment" type="button"
+          data-caption="Miles apart — but you were still the closest thing to my heart."
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1151.png" alt="Miles apart" loading="lazy" />
         </button>
 
-        <button class="moment" data-caption="Twinning — because even our vibes like to match. 💚">
+        <button class="moment" type="button"
+          data-caption="Twinning — because even our vibes like to match. 💚"
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_1305.jpeg" alt="Twinning" loading="lazy" />
         </button>
 
-        <button class="moment" data-caption="In your element — I swear you glow when you’re doing what you love.">
+        <button class="moment" type="button"
+          data-caption="In your element — I swear you glow when you’re doing what you love."
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_6160.jpeg" alt="In your element" loading="lazy" />
         </button>
 
-        <button class="moment" data-caption="Under surveillance… but we don’t care 😌 (they can watch us be happy).">
+        <button class="moment" type="button"
+          data-caption="Under surveillance… but we don’t care 😌 (they can watch us be happy)."
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/IMG_4509.jpeg" alt="Under surveillance" loading="lazy" />
         </button>
 
-        <button class="moment" data-caption="In your element (again) — and I’m still your biggest fan. Always.">
-          <img src="./assets/us6.jpg" alt="In your element again" loading="lazy" />
-        </button>
-
-        <button class="moment" data-caption="Us — my favorite place to be.">
+        <button class="moment" type="button"
+          data-caption="Us — my favorite place to be."
+          data-src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg">
           <img src="https://bcaajafisvrttvinjfad.supabase.co/storage/v1/object/public/notnaz/CF31D6D0-220F-4CF8-961E-9A1230B7DB5A.jpeg" alt="Us" loading="lazy" />
         </button>
       </div>
 
       <div class="nav-row">
-        <button class="btn" data-prev="#start">← Back</button>
-        <button class="btn primary" data-next="#question">Next → The question</button>
+        <button class="btn" id="backToTopBtn" type="button">← Back</button>
+        <button class="btn primary" id="toQuestionBtn" type="button">Next → The question</button>
       </div>
     </section>
 
     <!-- FINAL QUESTION -->
-    <section class="card final" id="question">
+    <section class="card" id="question">
       <div class="final-box">
+        <h2 class="final-title">…</h2>
         <h3 class="big-question">Will you be my Valentine?</h3>
 
         <div class="buttons">
@@ -142,33 +149,23 @@
             <button class="btn ghost" id="copyBtn" type="button">Copy a cute message</button>
           </div>
 
-          <p class="muted small" id="copyStatus" aria-live="polite"></p>
+          <p class="muted tiny" id="copyStatus" aria-live="polite"></p>
         </div>
 
         <div class="nav-row">
-          <button class="btn" data-prev="#memories">← Back</button>
-          <button class="btn ghost" data-next="#start">Back to top ↑</button>
+          <button class="btn" id="backToMomentsBtn" type="button">← Back</button>
+          <button class="btn ghost" id="restartBtn" type="button">Restart ↺</button>
         </div>
       </div>
     </section>
 
     <!-- AUDIO -->
     <audio id="bgMusic" preload="auto" loop playsinline>
-      <source src="./assets/song.mp3" type="audio/mpeg" />
+      <source src="assets/song.mp3" type="audio/mpeg" />
     </audio>
 
     <!-- CONFETTI CANVAS -->
     <canvas id="confetti" aria-hidden="true"></canvas>
-
-    <!-- MODAL -->
-    <dialog id="modal" class="modal">
-      <div class="modal-inner">
-        <p id="modalText"></p>
-        <div class="modal-actions">
-          <button id="modalCloseBtn" class="btn primary" type="button">Okay 💚</button>
-        </div>
-      </div>
-    </dialog>
 
     <!-- FULLSCREEN VIEWER -->
     <div id="viewer" class="viewer" hidden aria-hidden="true">
@@ -176,16 +173,15 @@
       <img id="viewerImg" alt="Full screen memory" />
       <div class="viewer-caption" id="viewerCaption"></div>
     </div>
+
+    <!-- TOAST -->
+    <div id="toast" class="toast" hidden aria-live="polite"></div>
   </main>
 
   <footer class="footer">
-    <p>
-      Made with 💚 + 🌹
-      <span class="sep">•</span>
-      <button class="linklike" id="restartBtn" type="button">Restart</button>
-    </p>
+    <p>Made with 💚 + 🌹</p>
   </footer>
 
-  <script src="./app.js?v=10" defer></script>
+  <script src="app.js?v=1" defer></script>
 </body>
 </html>
