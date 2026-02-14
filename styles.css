@@ -1,4 +1,4 @@
-/* styles.css — Mobile-first, production-ready */
+/* styles.css — Mobile-first, production-ready, GitHub Pages safe */
 
 :root{
   --green:#2ee59d;
@@ -277,49 +277,69 @@ body::before{
 }
 
 /* ---------------------------
-   VIEWER (scrollable mode)
+   VIEWER (scrollable + drag-to-close)
    --------------------------- */
 
-/* The viewer itself scrolls (NOT the page behind). */
 .viewer{
   position: fixed;
   inset: 0;
   z-index: 9998;
   background: rgba(0,0,0,.86);
-  overflow-y: auto;                 /* ✅ SCROLL inside viewer */
-  -webkit-overflow-scrolling: touch;/* smooth iOS */
+  overflow-y: auto;                  /* ✅ scroll in viewer mode */
+  -webkit-overflow-scrolling: touch;
 }
 
-/* Make close button SUPER obvious and always visible */
+/* Drag indicator */
+.viewer .drag-hint{
+  width: 46px;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,.28);
+  margin: 10px auto 6px;
+}
+
+/* Always-visible, obvious close button */
 .viewer-close{
-  position: sticky;                 /* stays visible as you scroll viewer */
+  position: sticky;
   top: 10px;
-  margin: 10px 10px 0 auto;
+  margin: 10px 12px 0 auto;
   display: inline-flex;
   align-items:center;
-  gap: 8px;
+  gap: 10px;
 
   z-index: 10000;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.22);
-  background: rgba(0,0,0,.65);
+  background: rgba(0,0,0,.72);
   color: #fff;
   cursor: pointer;
-  font-weight: 800;
-  box-shadow: 0 10px 30px rgba(0,0,0,.45);
+  font-weight: 900;
+  font-size: 16px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.50);
+}
+.viewer-close .x{
+  width: 26px;
+  height: 26px;
+  display:grid;
+  place-items:center;
+  border-radius: 999px;
+  background: rgba(255,255,255,.12);
+  border: 1px solid rgba(255,255,255,.16);
 }
 
-/* viewer content wrapper so image can be large but caption scrolls */
+/* Wrapper: enables nice pull-down animation without breaking scroll */
 .viewer-content{
   width: min(980px, 94vw);
   margin: 0 auto;
-  padding: 8px 0 18px;
+  padding: 6px 0 18px;
   display: grid;
   gap: 12px;
+  transform: translateY(var(--pull, 0px));
+  transition: transform 160ms ease;
+  will-change: transform;
 }
 
-/* image gets “full screen feel” */
 .viewer img{
   width: 100%;
   max-height: 78vh;
@@ -330,7 +350,6 @@ body::before{
   background: rgba(0,0,0,.25);
 }
 
-/* caption as a glassy sheet that can be long */
 .viewer-caption{
   border-radius: 16px;
   border: 1px solid rgba(255,255,255,.14);
