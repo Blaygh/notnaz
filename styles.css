@@ -277,20 +277,26 @@ body::before{
 }
 
 /* ---------------------------
-   VIEWER (scrollable + drag-to-close)
+   VIEWER (swipe left/right + drag-to-close)
    --------------------------- */
 
 .viewer{
   position: fixed;
   inset: 0;
-  z-index: 99999; /* was 9998 — make it unquestionably higher */
+  z-index: 99999;                 /* always above sticky topbar */
   background: rgba(0,0,0,.86);
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  isolation: isolate; /* prevents weird stacking with other sticky elements */
+  isolation: isolate;
 }
 
-/* Drag indicator */
+/* prevent accidental selection while swiping */
+.viewer, .viewer *{
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* drag hint */
 .viewer .drag-hint{
   width: 46px;
   height: 5px;
@@ -299,16 +305,13 @@ body::before{
   margin: 10px auto 6px;
 }
 
-/* Always-visible, obvious close button */
+/* big obvious close button */
 .viewer-close{
   position: sticky;
-  top: env(safe-area-inset-top, 0px); /* supports iPhone notch */
-  margin: 10px 12px 0 auto;
-  display: inline-flex;
-  align-items:center;
-  gap: 10px;
+  top: env(safe-area-inset-top, 0px);
+  margin: calc(10px + env(safe-area-inset-top, 0px)) 12px 0 auto;
 
-  z-index: 10000;
+  z-index: 100000;
   padding: 14px 16px;
   border-radius: 999px;
   border: 1px solid rgba(255,255,255,.22);
@@ -318,6 +321,11 @@ body::before{
   font-weight: 900;
   font-size: 16px;
   box-shadow: 0 12px 34px rgba(0,0,0,.50);
+
+  display: inline-flex;
+  align-items:center;
+  gap: 10px;
+  -webkit-tap-highlight-color: transparent;
 }
 .viewer-close .x{
   width: 26px;
@@ -329,13 +337,14 @@ body::before{
   border: 1px solid rgba(255,255,255,.16);
 }
 
-/* Wrapper: enables nice pull-down animation without breaking scroll */
+/* content wrapper allows pull-down animation */
 .viewer-content{
   width: min(980px, 94vw);
   margin: 0 auto;
-  padding: 6px 0 18px;
+  padding: 6px 0 22px;
   display: grid;
   gap: 12px;
+
   transform: translateY(var(--pull, 0px));
   transition: transform 160ms ease;
   will-change: transform;
@@ -360,7 +369,33 @@ body::before{
   color: rgba(255,255,255,.92);
 }
 
-/* audio gate (no blur to avoid sticky blur bugs) */
+/* prev/next buttons */
+.viewer-nav{
+  position: fixed;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100000;
+  border: 1px solid rgba(255,255,255,.22);
+  background: rgba(0,0,0,.55);
+  color: #fff;
+  border-radius: 999px;
+  padding: 12px 14px;
+  cursor: pointer;
+  font-weight: 900;
+  font-size: 22px;
+  box-shadow: 0 12px 34px rgba(0,0,0,.40);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.viewer-prev{ left: 12px; }
+.viewer-next{ right: 12px; }
+.viewer-nav:active{ transform: translateY(-50%) scale(.98); }
+
+@media (max-width: 420px){
+  .viewer-nav{ top: 58%; }
+}
+
+/* audio gate */
 .audio-gate{
   position: fixed;
   inset: 0;
